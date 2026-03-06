@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Now Playing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="bg-image"></div>
+    
+    <div id="login-screen" class="glass-container">
+        <h1>Connect Your Music</h1>
+        <p>Enter your name to start the dashboard</p>
+        <input type="text" id="username-input" placeholder="Spotify Username...">
+        <button id="login-button" onclick="redirectToSpotify()">Connect with Spotify</button>
+    </div>
+
+    <div id="player-screen" class="glass-container" style="display: none;">
+        <div id="album-art-container">
+            <img id="track-img" src="" alt="Album Art">
+        </div>
+        <div class="info">
+            <h1 id="track-title">Loading...</h1>
+            <h2 id="track-artist">Artist Name</h2>
+            <div class="status-badge">Now Playing</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
