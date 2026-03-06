@@ -110,3 +110,12 @@ async function generateCodeChallenge(verifier) {
     const data = new TextEncoder().encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
     return btoa(String.
+
+
+// Add this to the very bottom of your script.js file
+document.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.getElementById('login-button');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', redirectToSpotify);
+    }
+});
