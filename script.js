@@ -2,7 +2,6 @@ const clientId = '054bc32e28714b00b83d4761cd5406d9';
 const redirectUri = 'https://sirgrant618.github.io/spotify-now-playing/'; 
 const scope = 'user-read-currently-playing user-read-playback-state';
 
-// 1. AUTH LOGIC
 async function redirectToSpotify() {
     const verifier = generateRandomString(64);
     window.localStorage.setItem('code_verifier', verifier);
@@ -39,7 +38,6 @@ async function handleCallback(code) {
     }
 }
 
-// 2. DATA POLLING
 function startPolling(token) {
     updateNowPlaying(token);
     setInterval(() => updateNowPlaying(token), 5000); 
@@ -58,10 +56,9 @@ async function updateNowPlaying(token) {
         document.getElementById('track-artist').innerText = item.artists[0].name.toUpperCase();
         document.getElementById('track-img').src = item.album.images[0].url;
 
-        // FETCH ARTIST IMAGE
+        // FETCH ARTIST IMAGE (FIXED URL)
         const artistId = item.artists[0].id;
-        // The URL below now correctly uses the variable
-        const artistRes = await fetch(`https://api.spotify.com/v1/artists/$${artistId}`, {
+        const artistRes = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const artistData = await artistRes.json();
@@ -74,7 +71,7 @@ async function updateNowPlaying(token) {
                 setTimeout(() => {
                     bg.style.backgroundImage = newUrl;
                     bg.style.opacity = 1;
-                }, 500);
+                }, 1000);
             }
         }
     } catch (err) { console.error(err); }
