@@ -2,6 +2,7 @@ const clientId = '054bc32e28714b00b83d4761cd5406d9';
 const redirectUri = 'https://sirgrant618.github.io/spotify-now-playing/'; 
 const scope = 'user-read-currently-playing user-read-playback-state';
 
+// 1. AUTHENTICATION
 async function redirectToSpotify() {
     const verifier = generateRandomString(64);
     window.localStorage.setItem('code_verifier', verifier);
@@ -38,6 +39,7 @@ async function handleCallback(code) {
     }
 }
 
+// 2. DATA POLLING
 function startPolling(token) {
     updateNowPlaying(token);
     setInterval(() => updateNowPlaying(token), 5000); 
@@ -48,7 +50,9 @@ async function updateNowPlaying(token) {
         const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.status === 204) return;
+        
+        if (res.status === 204 || res.status === 401) return;
+        
         const data = await res.json();
         const item = data.item;
 
@@ -56,7 +60,7 @@ async function updateNowPlaying(token) {
         document.getElementById('track-artist').innerText = item.artists[0].name.toUpperCase();
         document.getElementById('track-img').src = item.album.images[0].url;
 
-        // FETCH ARTIST IMAGE (FIXED URL)
+        // FETCH REAL ARTIST IMAGE
         const artistId = item.artists[0].id;
         const artistRes = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -74,7 +78,7 @@ async function updateNowPlaying(token) {
                 }, 1000);
             }
         }
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Error:", err); }
 }
 
 function showPlayer() {
