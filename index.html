@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zune Style Now Playing</title>
+    <title>Zune Now Playing</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,18 +11,17 @@
     
     <div id="login-screen" class="glass-container">
         <h1 class="zune-text">ZUNE // CONNECT</h1>
-        <input type="text" id="username-input" placeholder="USERNAME...">
         <button id="login-button" onclick="redirectToSpotify()">START</button>
     </div>
 
     <div id="player-screen" style="display: none;">
         <div class="zune-layout">
-            <div class="text-meta">
-                <h1 id="track-title" class="big-text">SONG TITLE</h1>
-                <h2 id="track-artist" class="mid-text">ARTIST NAME</h2>
-            </div>
             <div class="art-section">
                 <img id="track-img" src="" alt="Album Art">
+            </div>
+            <div class="text-meta">
+                <h1 id="track-title">LOADING...</h1>
+                <h2 id="track-artist">ARTIST</h2>
             </div>
         </div>
     </div>
