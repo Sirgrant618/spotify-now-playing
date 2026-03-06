@@ -1,83 +1,244 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap');
 
-body, html {
-    margin: 0; padding: 0;
-    height: 100%; width: 100%;
-    background-color: #000;
-    font-family: 'Inter', sans-serif;
+:root {
+    --wash-1: rgba(228, 0, 70, 0.28);
+    --wash-2: rgba(0, 173, 239, 0.24);
+    --wash-3: rgba(255, 133, 0, 0.22);
+    --text-color: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.95);
+    --panel-bg: rgba(255, 255, 255, 0.06);
+    --panel-border: rgba(255, 255, 255, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    background: #000;
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
 }
 
-/* 1. BACKGROUND: PAN, ZOOM, & COLOR WASH */
-#bg-image {
+/* BACKGROUND SYSTEM */
+#bg-wrap {
     position: fixed;
-    top: -15%; left: -15%;
-    width: 130%; height: 130%;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+.bg-layer {
+    position: absolute;
+    top: -12%;
+    left: -12%;
+    width: 124%;
+    height: 124%;
     background-size: cover;
-    background-position: center;
-    z-index: -1;
-    filter: blur(50px) brightness(0.5);
-    background-blend-mode: overlay;
-    transition: opacity 1.5s ease-in-out;
-    animation: zuneVibe 30s infinite alternate ease-in-out;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: blur(50px) brightness(0.42) saturate(1.1);
+    transform: scale(1.06);
+    opacity: 0;
+    transition:
+        opacity 1.3s ease,
+        transform 14s ease,
+        filter 1s ease;
+    will-change: opacity, transform, background-image;
 }
 
-@keyframes zuneVibe {
-    0% { transform: scale(1); background-color: rgba(228, 0, 70, 0.3); }
-    50% { transform: scale(1.1) translate(-2%, 2%); background-color: rgba(0, 173, 239, 0.3); }
-    100% { transform: scale(1.05) translate(2%, -2%); background-color: rgba(255, 133, 0, 0.3); }
+.bg-layer.active {
+    opacity: 1;
+    animation: bgDrift 28s ease-in-out infinite alternate;
 }
 
-/* 2. LAYOUT: ALBUM LEFT, TEXT RIGHT */
+.bg-color-wash {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 18% 20%, var(--wash-1), transparent 42%),
+        radial-gradient(circle at 82% 28%, var(--wash-2), transparent 40%),
+        radial-gradient(circle at 50% 85%, var(--wash-3), transparent 45%);
+    mix-blend-mode: screen;
+    opacity: 0.95;
+    animation: washMove 18s ease-in-out infinite alternate;
+}
+
+.bg-vignette {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at center, transparent 35%, rgba(0,0,0,0.35) 68%, rgba(0,0,0,0.78) 100%);
+    pointer-events: none;
+}
+
+.bg-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 3px 3px, 4px 4px;
+    mix-blend-mode: soft-light;
+}
+
+@keyframes bgDrift {
+    0% {
+        transform: scale(1.06) translate3d(0, 0, 0);
+    }
+    50% {
+        transform: scale(1.12) translate3d(-2%, 1.5%, 0);
+    }
+    100% {
+        transform: scale(1.09) translate3d(2%, -1.5%, 0);
+    }
+}
+
+@keyframes washMove {
+    0% {
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+    100% {
+        transform: scale(1.08) translate3d(1.5%, -1.5%, 0);
+    }
+}
+
+/* FOREGROUND */
+#login-screen,
+#player-screen {
+    position: relative;
+    z-index: 2;
+}
+
+#player-screen {
+    width: 100%;
+    height: 100%;
+}
+
 .zune-layout {
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: 22px;
+    width: 100%;
     height: 100vh;
-    padding-left: 10%;
+    padding: 8vh 8vw;
 }
 
-#track-img {
-    width: 450px;
-    height: 450px;
-    border: 5pt solid white; /* 5pt White Border */
-    object-fit: cover;
+.art-section {
     flex-shrink: 0;
 }
 
+#track-img {
+    width: min(34vw, 450px);
+    height: min(34vw, 450px);
+    object-fit: cover;
+    display: block;
+    border: 5pt solid var(--border-color);
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255,255,255,0.08) inset;
+    background: rgba(255,255,255,0.05);
+}
+
 .text-meta {
-    margin-left: 10px; /* 10px to the right of art */
+    min-width: 0;
+    max-width: 60vw;
     text-align: left;
-    color: white;
+    color: #fff;
+    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.45);
+}
+
+#track-title,
+#track-artist {
+    overflow-wrap: anywhere;
 }
 
 #track-title {
-    font-size: 5rem;
-    font-weight: 900;
-    text-transform: uppercase; /* All Caps */
     margin: 0;
-    line-height: 0.9;
-    letter-spacing: -3px;
+    font-size: clamp(3rem, 7vw, 6.2rem);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.06em;
+    text-transform: uppercase;
 }
 
 #track-artist {
-    font-size: 3.33rem; /* Exactly 2/3rds of Title */
+    margin: 10px 0 0 0;
+    font-size: clamp(1.6rem, 4vw, 4rem);
     font-weight: 700;
-    text-transform: uppercase; /* All Caps */
-    margin: 5px 0 0 0;
-    letter-spacing: -1px;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    opacity: 0.95;
 }
 
-/* Login Screen UI */
+/* LOGIN */
 .glass-container {
     position: absolute;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
+    min-width: min(90vw, 420px);
     text-align: center;
-    color: white;
+    padding: 36px 32px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel-bg);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
+
+.zune-text {
+    margin: 0 0 20px 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: -0.05em;
+}
+
 #login-button {
-    background: white; color: black;
-    padding: 15px 40px; border: none;
-    font-weight: 900; cursor: pointer;
+    appearance: none;
+    border: none;
+    padding: 15px 42px;
+    background: #fff;
+    color: #000;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+#login-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+#login-button:active {
+    transform: translateY(0);
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+    .zune-layout {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 22px;
+        padding: 7vh 7vw;
+    }
+
+    #track-img {
+        width: min(78vw, 380px);
+        height: min(78vw, 380px);
+    }
+
+    .text-meta {
+        max-width: 86vw;
+    }
 }
