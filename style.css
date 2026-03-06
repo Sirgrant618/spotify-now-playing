@@ -1,153 +1,88 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap');
 
-:root {
-    --bg-dark: #050505;
-}
-
 body, html {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     height: 100%;
-    background-color: var(--bg-dark);
+    background-color: #050505;
     font-family: 'Inter', sans-serif;
-    color: white;
     overflow: hidden;
 }
 
-/* 1. BACKGROUND WITH COLOR WASH */
+/* 1. BACKGROUND WITH COLOR WASH, PAN, AND ZOOM */
 #bg-image {
     position: fixed;
-    width: 120%;
-    height: 120%;
-    top: -10%;
-    left: -10%;
+    width: 130%; height: 130%;
+    top: -15%; left: -15%;
     background-size: cover;
     background-position: center;
-    filter: brightness(0.4) blur(40px);
+    filter: blur(40px) brightness(0.5);
     z-index: -1;
-    transition: opacity 0.8s ease-in-out, background-image 1.5s ease-in-out;
-    /* This animation handles the pan, zoom, and color wash */
-    animation: zuneBackgroundEffect 20s infinite alternate ease-in-out;
+    background-blend-mode: overlay; /* This mixes the color wash with the image */
+    transition: opacity 1s ease-in-out;
+    animation: zuneFlow 25s infinite alternate ease-in-out;
 }
 
-/* 2. LEFT-ALIGNED LAYOUT */
+@keyframes zuneFlow {
+    0% { transform: scale(1) translate(0, 0); background-color: rgba(228, 0, 70, 0.3); }
+    33% { transform: scale(1.1) translate(-2%, 2%); background-color: rgba(0, 173, 239, 0.3); }
+    66% { transform: scale(1.05) translate(2%, -1%); background-color: rgba(255, 133, 0, 0.3); }
+    100% { transform: scale(1.15) translate(-1%, -2%); background-color: rgba(123, 31, 162, 0.3); }
+}
+
+/* 2. LAYOUT */
 .zune-layout {
     display: flex;
-    flex-direction: row; /* Album art on left, text on right */
-    align-items: center;
+    align-items: center; /* Center vertically */
     height: 100vh;
-    padding-left: 5%; /* Padding from the left edge */
+    padding-left: 50px;
 }
 
-/* 3. ALBUM ART WITH 5PT BORDER */
-.art-section {
+/* 3. ALBUM ART (LEFT) */
+#track-img {
+    width: 450px;
+    height: 450px;
+    border: 5pt solid white; /* 5pt White Border */
+    object-fit: cover;
     flex-shrink: 0;
 }
 
-#track-img {
-    width: 400px; /* Fixed size to maintain layout */
-    height: 400px;
-    border: 5pt solid white; /* 5pt White Border */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    object-fit: cover;
-}
-
-/* 4. TEXT SECTION (10px to the right) */
+/* 4. TEXT (RIGHT) */
 .text-meta {
-    margin-left: 10px; /* 10px distance from art */
-    text-align: left; /* Left justified */
-    display: flex;
-    flex-direction: column;
+    margin-left: 10px; /* 10px spacing from art */
+    text-align: left;
+    color: white;
 }
 
 #track-title {
-    font-size: 4rem; /* Base size */
-    font-weight: 900; /* Bold */
-    text-transform: uppercase; /* All Caps */
-    color: white; /* All White */
+    font-size: 60px; /* Base size */
+    font-weight: 900;
+    text-transform: uppercase;
     margin: 0;
-    line-height: 0.9;
+    line-height: 1;
 }
 
 #track-artist {
-    font-size: 2.66rem; /* Exactly 2/3rd of 4rem */
+    /* Artist size is 2/3 of title (60 * 0.66 = 40) */
+    font-size: 40px; 
     font-weight: 700;
-    text-transform: uppercase; /* All Caps */
-    color: white; /* All White */
-    margin-top: 5px;
+    text-transform: uppercase;
+    margin: 5px 0 0 0;
     opacity: 0.9;
 }
 
-/* 5. ANIMATIONS */
-@keyframes zuneBackgroundEffect {
-    0% {
-        transform: scale(1) translate(0, 0);
-        background-color: rgba(228, 0, 70, 0.2); /* Zune Pink wash */
-        background-blend-mode: overlay;
-    }
-    33% {
-        transform: scale(1.1) translate(-2%, 2%);
-        background-color: rgba(0, 173, 239, 0.2); /* Zune Blue wash */
-        background-blend-mode: overlay;
-    }
-    66% {
-        transform: scale(1.05) translate(2%, -1%);
-        background-color: rgba(255, 133, 0, 0.2); /* Zune Orange wash */
-        background-blend-mode: overlay;
-    }
-    100% {
-        transform: scale(1.15) translate(-1%, -2%);
-        background-color: rgba(123, 31, 162, 0.2); /* Purple wash */
-        background-blend-mode: overlay;
-    }
-}
-
-/* Login screen styles remain the same */
+/* Login styles */
 .glass-container {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    padding: 3rem;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
     text-align: center;
-}}
-
-/* 5. ANIMATIONS */
-@keyframes zuneBackgroundEffect {
-    0% {
-        transform: scale(1) translate(0, 0);
-        background-color: rgba(228, 0, 70, 0.2); /* Zune Pink wash */
-        background-blend-mode: overlay;
-    }
-    33% {
-        transform: scale(1.1) translate(-2%, 2%);
-        background-color: rgba(0, 173, 239, 0.2); /* Zune Blue wash */
-        background-blend-mode: overlay;
-    }
-    66% {
-        transform: scale(1.05) translate(2%, -1%);
-        background-color: rgba(255, 133, 0, 0.2); /* Zune Orange wash */
-        background-blend-mode: overlay;
-    }
-    100% {
-        transform: scale(1.15) translate(-1%, -2%);
-        background-color: rgba(123, 31, 162, 0.2); /* Purple wash */
-        background-blend-mode: overlay;
-    }
 }
 
-/* Login screen styles remain the same */
-.glass-container {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    padding: 3rem;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.1);
-    text-align: center;
+#login-button {
+    background: white;
+    color: black;
+    padding: 15px 40px;
+    border: none;
+    font-weight: 900;
+    cursor: pointer;
 }
