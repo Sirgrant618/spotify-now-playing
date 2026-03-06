@@ -59,7 +59,7 @@ html, body {
 }
 
 body.immersive .bg-layer.active {
-    filter: blur(8px) brightness(0.56) saturate(1.18);
+    filter: blur(0px) brightness(0.56) saturate(1.18);
     animation: kenBurns 28s ease-in-out infinite alternate;
 }
 
