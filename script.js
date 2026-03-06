@@ -119,6 +119,8 @@ async function updateNowPlaying(token) {
         const artistName = item.artists?.[0]?.name || 'UNKNOWN ARTIST';
         const albumArt = item.album?.images?.[0]?.url || '';
 
+        const isTrackChange = trackId !== currentTrackId;
+
         document.getElementById('track-title').textContent = trackTitle.toUpperCase();
         document.getElementById('track-artist').textContent = artistName.toUpperCase();
         document.getElementById('track-img').src = albumArt;
@@ -126,8 +128,7 @@ async function updateNowPlaying(token) {
 
         showPlayer();
 
-        /* Only refresh heavy visual work when the track changes */
-        if (trackId === currentTrackId) return;
+        if (!isTrackChange) return;
         currentTrackId = trackId;
 
         let backgroundImage = albumArt;
@@ -159,6 +160,8 @@ async function updateNowPlaying(token) {
         if (albumArt) {
             applyPaletteFromImage(albumArt);
         }
+
+        runTrackChangeAnimations();
     } catch (err) {
         console.error('Error updating now playing:', err);
     }
@@ -181,6 +184,27 @@ function renderIdleState(title = 'NOTHING PLAYING', artist = 'OPEN SPOTIFY') {
     document.getElementById('track-img').alt = 'No album art';
 
     currentTrackId = null;
+}
+
+/* =========================
+   TRACK CHANGE ANIMATIONS
+========================= */
+function runTrackChangeAnimations() {
+    const img = document.getElementById('track-img');
+    const title = document.getElementById('track-title');
+    const artist = document.getElementById('track-artist');
+    const flash = document.getElementById('bg-flash');
+
+    resetAnimation(img, 'track-change');
+    resetAnimation(title, 'track-change');
+    resetAnimation(artist, 'track-change');
+    resetAnimation(flash, 'trigger');
+}
+
+function resetAnimation(element, className) {
+    element.classList.remove(className);
+    void element.offsetWidth;
+    element.classList.add(className);
 }
 
 /* =========================
