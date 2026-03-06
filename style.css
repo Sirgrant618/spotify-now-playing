@@ -1,106 +1,83 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap');
 
-/* 1. RESET & BASE */
 body, html {
-    margin: 0; 
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    background-color: #000; /* Deep black base */
+    margin: 0; padding: 0;
+    height: 100%; width: 100%;
+    background-color: #000;
     font-family: 'Inter', sans-serif;
     overflow: hidden;
 }
 
-/* 2. THE BACKGROUND LAYER (The one that's missing) */
+/* 1. BACKGROUND: PAN, ZOOM, & COLOR WASH */
 #bg-image {
     position: fixed;
-    top: -10%; 
-    left: -10%;
-    width: 120vw; /* Using viewport width to ensure it covers everything */
-    height: 120vh;
+    top: -15%; left: -15%;
+    width: 130%; height: 130%;
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
-    
-    /* Ensure this is at the VERY bottom */
-    z-index: -1; 
-    
-    /* Soften the image for the Zune look */
-    filter: blur(50px) brightness(0.6);
-    
-    /* Transition for the script's fade effect */
-    transition: opacity 1.5s ease-in-out;
-    opacity: 0; /* Starts hidden, script turns it to 1 */
-    
-    /* The color wash effect */
+    z-index: -1;
+    filter: blur(50px) brightness(0.5);
     background-blend-mode: overlay;
-    animation: zuneFlow 30s infinite alternate ease-in-out;
+    transition: opacity 1.5s ease-in-out;
+    animation: zuneVibe 30s infinite alternate ease-in-out;
 }
 
-/* 3. THE MAIN PLAYER LAYOUT */
-#player-screen {
-    position: relative;
-    z-index: 10; /* Ensures text is ABOVE the background */
-    width: 100%;
-    height: 100%;
+@keyframes zuneVibe {
+    0% { transform: scale(1); background-color: rgba(228, 0, 70, 0.3); }
+    50% { transform: scale(1.1) translate(-2%, 2%); background-color: rgba(0, 173, 239, 0.3); }
+    100% { transform: scale(1.05) translate(2%, -2%); background-color: rgba(255, 133, 0, 0.3); }
 }
 
+/* 2. LAYOUT: ALBUM LEFT, TEXT RIGHT */
 .zune-layout {
     display: flex;
     flex-direction: row;
     align-items: center;
     height: 100vh;
-    padding-left: 80px;
-    background: transparent; /* Crucial: ensures we can see through to the background */
+    padding-left: 10%;
 }
 
-/* 4. ALBUM ART (LEFT) */
 #track-img {
     width: 450px;
     height: 450px;
-    border: 5pt solid #fff; /* Your 5pt white border */
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    border: 5pt solid white; /* 5pt White Border */
     object-fit: cover;
     flex-shrink: 0;
 }
 
-/* 5. TEXT (RIGHT) */
 .text-meta {
-    margin-left: 20px; /* Slight bump from 10px for better breathing room */
+    margin-left: 10px; /* 10px to the right of art */
     text-align: left;
-    color: #fff;
+    color: white;
 }
 
 #track-title {
-    font-size: clamp(3rem, 8vw, 6rem); /* Adjusts size based on screen */
+    font-size: 5rem;
     font-weight: 900;
-    text-transform: uppercase;
+    text-transform: uppercase; /* All Caps */
     margin: 0;
     line-height: 0.9;
-    letter-spacing: -2px;
+    letter-spacing: -3px;
 }
 
 #track-artist {
-    /* 2/3rds the size of the title */
-    font-size: clamp(2rem, 5.3vw, 4rem); 
+    font-size: 3.33rem; /* Exactly 2/3rds of Title */
     font-weight: 700;
-    text-transform: uppercase;
-    margin: 10px 0 0 0;
-    opacity: 0.9;
+    text-transform: uppercase; /* All Caps */
+    margin: 5px 0 0 0;
+    letter-spacing: -1px;
 }
 
-/* 6. ANIMATIONS */
-@keyframes zuneFlow {
-    0% { transform: scale(1); background-color: rgba(228, 0, 70, 0.4); }
-    50% { transform: scale(1.1) translate(-2%, 2%); background-color: rgba(0, 173, 239, 0.4); }
-    100% { transform: scale(1.05) translate(2%, -2%); background-color: rgba(255, 133, 0, 0.4); }
-}
-
-/* Login UI remains standard */
+/* Login Screen UI */
 .glass-container {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
     color: white;
+}
+#login-button {
+    background: white; color: black;
+    padding: 15px 40px; border: none;
+    font-weight: 900; cursor: pointer;
 }
