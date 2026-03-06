@@ -113,4 +113,41 @@ body, html {
     border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.1);
     text-align: center;
+}}
+
+/* 5. ANIMATIONS */
+@keyframes zuneBackgroundEffect {
+    0% {
+        transform: scale(1) translate(0, 0);
+        background-color: rgba(228, 0, 70, 0.2); /* Zune Pink wash */
+        background-blend-mode: overlay;
+    }
+    33% {
+        transform: scale(1.1) translate(-2%, 2%);
+        background-color: rgba(0, 173, 239, 0.2); /* Zune Blue wash */
+        background-blend-mode: overlay;
+    }
+    66% {
+        transform: scale(1.05) translate(2%, -1%);
+        background-color: rgba(255, 133, 0, 0.2); /* Zune Orange wash */
+        background-blend-mode: overlay;
+    }
+    100% {
+        transform: scale(1.15) translate(-1%, -2%);
+        background-color: rgba(123, 31, 162, 0.2); /* Purple wash */
+        background-blend-mode: overlay;
+    }
+}
+
+/* Login screen styles remain the same */
+.glass-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    padding: 3rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
 }
