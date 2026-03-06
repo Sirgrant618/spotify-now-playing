@@ -6,6 +6,9 @@ let pollInterval = null;
 let currentTrackId = null;
 let activeBgId = 'bg-a';
 
+let inactivityTimer = null;
+const IDLE_DELAY_MS = 5000;
+
 /* =========================
    AUTH
 ========================= */
@@ -30,11 +33,14 @@ async function redirectToSpotify() {
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 
+setupActivityWatchers();
+
 if (code) {
     handleCallback(code);
 } else if (localStorage.getItem('access_token')) {
     showPlayer();
     startPolling(localStorage.getItem('access_token'));
+    resetInactivityTimer();
 }
 
 async function handleCallback(code) {
@@ -64,12 +70,53 @@ async function handleCallback(code) {
 
             showPlayer();
             startPolling(data.access_token);
+            resetInactivityTimer();
         } else {
             console.error('Spotify token error:', data);
         }
     } catch (err) {
         console.error('Callback error:', err);
     }
+}
+
+/* =========================
+   ACTIVITY / IMMERSIVE MODE
+========================= */
+function setupActivityWatchers() {
+    const wakeEvents = ['mousemove', 'mouseenter', 'mousedown', 'touchstart', 'keydown'];
+
+    wakeEvents.forEach(eventName => {
+        window.addEventListener(eventName, handleUserActivity, { passive: true });
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            clearTimeout(inactivityTimer);
+        } else {
+            handleUserActivity();
+        }
+    });
+}
+
+function handleUserActivity() {
+    exitImmersiveMode();
+    resetInactivityTimer();
+}
+
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+        enterImmersiveMode();
+    }, IDLE_DELAY_MS);
+}
+
+function enterImmersiveMode() {
+    if (document.getElementById('player-screen').style.display === 'none') return;
+    document.body.classList.add('immersive');
+}
+
+function exitImmersiveMode() {
+    document.body.classList.remove('immersive');
 }
 
 /* =========================
@@ -119,8 +166,6 @@ async function updateNowPlaying(token) {
         const artistName = item.artists?.[0]?.name || 'UNKNOWN ARTIST';
         const albumArt = item.album?.images?.[0]?.url || '';
 
-        const isTrackChange = trackId !== currentTrackId;
-
         document.getElementById('track-title').textContent = trackTitle.toUpperCase();
         document.getElementById('track-artist').textContent = artistName.toUpperCase();
         document.getElementById('track-img').src = albumArt;
@@ -128,7 +173,9 @@ async function updateNowPlaying(token) {
 
         showPlayer();
 
+        const isTrackChange = trackId !== currentTrackId;
         if (!isTrackChange) return;
+
         currentTrackId = trackId;
 
         let backgroundImage = albumArt;
@@ -154,14 +201,12 @@ async function updateNowPlaying(token) {
         }
 
         if (backgroundImage) {
-            await swapBackground(backgroundImage);
+            swapBackground(backgroundImage);
         }
 
         if (albumArt) {
             applyPaletteFromImage(albumArt);
         }
-
-        runTrackChangeAnimations();
     } catch (err) {
         console.error('Error updating now playing:', err);
     }
@@ -187,30 +232,9 @@ function renderIdleState(title = 'NOTHING PLAYING', artist = 'OPEN SPOTIFY') {
 }
 
 /* =========================
-   TRACK CHANGE ANIMATIONS
-========================= */
-function runTrackChangeAnimations() {
-    const img = document.getElementById('track-img');
-    const title = document.getElementById('track-title');
-    const artist = document.getElementById('track-artist');
-    const flash = document.getElementById('bg-flash');
-
-    resetAnimation(img, 'track-change');
-    resetAnimation(title, 'track-change');
-    resetAnimation(artist, 'track-change');
-    resetAnimation(flash, 'trigger');
-}
-
-function resetAnimation(element, className) {
-    element.classList.remove(className);
-    void element.offsetWidth;
-    element.classList.add(className);
-}
-
-/* =========================
    BACKGROUND CROSSFADE
 ========================= */
-async function swapBackground(imageUrl) {
+function swapBackground(imageUrl) {
     const active = document.getElementById(activeBgId);
     const inactiveBgId = activeBgId === 'bg-a' ? 'bg-b' : 'bg-a';
     const inactive = document.getElementById(inactiveBgId);
@@ -222,7 +246,6 @@ async function swapBackground(imageUrl) {
     }
 
     inactive.style.backgroundImage = cssUrl;
-    inactive.style.transform = 'scale(1.06)';
     inactive.classList.add('active');
     active.classList.remove('active');
 
