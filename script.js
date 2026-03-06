@@ -3,7 +3,18 @@ const clientId = '054bc32e28714b00b83d4761cd5406d9';
 const redirectUri = 'https://sirgrant618.github.io/spotify-now-playing/'; 
 const scope = 'user-read-currently-playing user-read-playback-state';
 
-// 2. AUTHENTICATION FUNCTION
+// 2. INITIALIZATION & ROUTING
+const urlParams = new URLSearchParams(window.location.search);
+let code = urlParams.get('code');
+
+if (code) {
+    handleCallback(code);
+} else if (localStorage.getItem('access_token')) {
+    showPlayer();
+    startPolling(localStorage.getItem('access_token'));
+}
+
+// 3. AUTHENTICATION (PKCE)
 async function redirectToSpotify() {
     const verifier = generateRandomString(64);
     window.localStorage.setItem('code_verifier', verifier);
@@ -19,17 +30,6 @@ async function redirectToSpotify() {
     });
 
     window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-}
-
-// 3. INITIALIZATION & CALLBACK HANDLING
-const urlParams = new URLSearchParams(window.location.search);
-let code = urlParams.get('code');
-
-if (code) {
-    handleCallback(code);
-} else if (localStorage.getItem('access_token')) {
-    showPlayer();
-    startPolling(localStorage.getItem('access_token'));
 }
 
 async function handleCallback(code) {
@@ -50,13 +50,14 @@ async function handleCallback(code) {
     const data = await response.json();
     if (data.access_token) {
         localStorage.setItem('access_token', data.access_token);
+        // Cleans the URL so the "code" isn't hanging around
         window.history.pushState({}, document.title, "/spotify-now-playing/"); 
         showPlayer();
         startPolling(data.access_token);
     }
 }
 
-// 4. DATA UPDATES
+// 4. DATA POLLING & VISUAL UPDATES
 function startPolling(token) {
     updateNowPlaying(token);
     setInterval(() => updateNowPlaying(token), 5000); 
@@ -68,35 +69,60 @@ async function updateNowPlaying(token) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (res.status === 204) return;
+        // If nothing is playing (204 No Content)
+        if (res.status === 204) {
+            document.getElementById('track-title').innerText = "SILENCE";
+            document.getElementById('track-artist').innerText = "START THE MUSIC";
+            return;
+        }
 
         const data = await res.json();
         const item = data.item;
 
+        // Update Text (Zune Style - Uppercase)
         document.getElementById('track-title').innerText = item.name.toUpperCase();
         document.getElementById('track-artist').innerText = item.artists[0].name.toUpperCase();
         document.getElementById('track-img').src = item.album.images[0].url;
 
+        // Fetch High-Res Artist Photo for Background
         const artistId = item.artists[0].id;
         const artistRes = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const artistData = await artistRes.json();
         
+        // SMOOTH BACKGROUND TRANSITION
         if (artistData.images && artistData.images.length > 0) {
-            document.getElementById('bg-image').style.backgroundImage = `url(${artistData.images[0].url})`;
+            const bg = document.getElementById('bg-image');
+            const newImgUrl = artistData.images[0].url;
+
+            // Only trigger the fade if the image has actually changed
+            if (bg.style.backgroundImage !== `url("${newImgUrl}")`) {
+                bg.style.opacity = 0; // Fade out
+                
+                setTimeout(() => {
+                    bg.style.backgroundImage = `url(${newImgUrl})`;
+                    bg.style.opacity = 1; // Fade in
+                }, 500);
+            }
         }
     } catch (err) {
+        // If token expires (401), send user back to login
+        if (err.status === 401) {
+            localStorage.clear();
+            location.reload();
+        }
         console.error("Sync Error:", err);
     }
 }
 
+// 5. UI HELPERS
 function showPlayer() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('player-screen').style.display = 'block';
 }
 
-// 5. HELPER FUNCTIONS
+// 6. CRYPTO HELPERS (Required for Spotify PKCE Security)
 function generateRandomString(length) {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
