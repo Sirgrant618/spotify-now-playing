@@ -34,13 +34,32 @@ const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 
 setupActivityWatchers();
+bootstrapAuth();
 
-if (code) {
-    handleCallback(code);
-} else if (localStorage.getItem('access_token')) {
-    showPlayer();
-    startPolling(localStorage.getItem('access_token'));
-    resetInactivityTimer();
+async function bootstrapAuth() {
+    if (code) {
+        await handleCallback(code);
+        return;
+    }
+
+    const accessToken = localStorage.getItem('access_token');
+    const refreshToken = localStorage.getItem('refresh_token');
+
+    if (accessToken) {
+        showPlayer();
+        startPolling(accessToken);
+        resetInactivityTimer();
+        return;
+    }
+
+    if (refreshToken) {
+        const newAccessToken = await refreshAccessToken();
+        if (newAccessToken) {
+            showPlayer();
+            startPolling(newAccessToken);
+            resetInactivityTimer();
+        }
+    }
 }
 
 async function handleCallback(code) {
@@ -66,6 +85,10 @@ async function handleCallback(code) {
         if (data.access_token) {
             localStorage.setItem('access_token', data.access_token);
 
+            if (data.refresh_token) {
+                localStorage.setItem('refresh_token', data.refresh_token);
+            }
+
             window.history.pushState({}, document.title, '/spotify-now-playing/');
 
             showPlayer();
@@ -73,9 +96,52 @@ async function handleCallback(code) {
             resetInactivityTimer();
         } else {
             console.error('Spotify token error:', data);
+            showReconnectScreen();
         }
     } catch (err) {
         console.error('Callback error:', err);
+        showReconnectScreen();
+    }
+}
+
+async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) return null;
+
+    try {
+        const response = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                client_id: clientId,
+                grant_type: 'refresh_token',
+                refresh_token: refreshToken
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.access_token) {
+            console.error('Refresh token error:', data);
+            clearSpotifySession();
+            showReconnectScreen();
+            return null;
+        }
+
+        localStorage.setItem('access_token', data.access_token);
+
+        if (data.refresh_token) {
+            localStorage.setItem('refresh_token', data.refresh_token);
+        }
+
+        return data.access_token;
+    } catch (err) {
+        console.error('Refresh request failed:', err);
+        clearSpotifySession();
+        showReconnectScreen();
+        return null;
     }
 }
 
@@ -126,10 +192,15 @@ function startPolling(token) {
     if (pollInterval) clearInterval(pollInterval);
 
     updateNowPlaying(token);
-    pollInterval = setInterval(() => updateNowPlaying(token), 5000);
+    pollInterval = setInterval(async () => {
+        const latestToken = localStorage.getItem('access_token');
+        if (latestToken) {
+            await updateNowPlaying(latestToken);
+        }
+    }, 5000);
 }
 
-async function updateNowPlaying(token) {
+async function updateNowPlaying(token, hasRetried = false) {
     try {
         const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             headers: {
@@ -143,8 +214,18 @@ async function updateNowPlaying(token) {
         }
 
         if (res.status === 401) {
-            console.warn('Access token expired or invalid.');
-            renderIdleState('SESSION EXPIRED', 'RECONNECT TO SPOTIFY');
+            if (hasRetried) {
+                clearSpotifySession();
+                showReconnectScreen();
+                return;
+            }
+
+            const newAccessToken = await refreshAccessToken();
+            if (newAccessToken) {
+                await updateNowPlaying(newAccessToken, true);
+            } else {
+                showReconnectScreen();
+            }
             return;
         }
 
@@ -185,7 +266,7 @@ async function updateNowPlaying(token) {
             try {
                 const artistRes = await fetch(`https://api.spotify.com/v1/artists/${primaryArtistId}`, {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${localStorage.getItem('access_token') || token}`
                     }
                 });
 
@@ -220,6 +301,13 @@ function showPlayer() {
     document.getElementById('player-screen').style.display = 'block';
 }
 
+function showReconnectScreen() {
+    clearTimeout(inactivityTimer);
+    document.body.classList.remove('immersive');
+    document.getElementById('player-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'block';
+}
+
 function renderIdleState(title = 'NOTHING PLAYING', artist = 'OPEN SPOTIFY') {
     showPlayer();
 
@@ -229,6 +317,12 @@ function renderIdleState(title = 'NOTHING PLAYING', artist = 'OPEN SPOTIFY') {
     document.getElementById('track-img').alt = 'No album art';
 
     currentTrackId = null;
+}
+
+function clearSpotifySession() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('code_verifier');
 }
 
 /* =========================
