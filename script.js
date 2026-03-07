@@ -8,7 +8,11 @@ let currentAlbumName = "";
 let activeBgId = 'bg-a';
 let inactivityTimer = null;
 let immersiveSequenceTimeout = null;
+let overlaySwitchTimeout = null;
 const IDLE_DELAY_MS = 5000;
+const OVERLAY_FADE_MS = 2000;
+const OVERLAY_1_DURATION_MS = 30000;
+const OVERLAY_2_DURATION_MS = 30000;
 
 /* --- AUTH --- */
 async function redirectToSpotify() {
@@ -102,34 +106,70 @@ function enterImmersiveMode() {
 function exitImmersiveMode() {
     document.body.classList.remove('immersive');
     clearTimeout(immersiveSequenceTimeout);
-    document.getElementById('immersive-overlay-1').style.display = 'none';
-    document.getElementById('immersive-overlay-2').style.display = 'none';
+    clearTimeout(overlaySwitchTimeout);
+    hideOverlay(document.getElementById('immersive-overlay-1'));
+    hideOverlay(document.getElementById('immersive-overlay-2'));
+}
+
+function hideOverlay(el) {
+    if (!el) return;
+    el.classList.remove('active');
+}
+
+function showOverlay(el) {
+    if (!el) return;
+    el.classList.add('active');
+}
+
+function buildRepeatedLine(text) {
+    const value = (text || '').trim();
+    return value ? (value + ' ').repeat(34).trim() : '';
+}
+
+function populateMarqueeText() {
+    const track = document.getElementById('track-title').textContent;
+    const artist = document.getElementById('track-artist').textContent;
+    const album = currentAlbumName.toUpperCase();
+
+    document.getElementById('imm-track-1').textContent = buildRepeatedLine(track);
+    document.getElementById('imm-artist-1').textContent = buildRepeatedLine(artist);
+    document.getElementById('imm-album-1').textContent = buildRepeatedLine(album);
 }
 
 function startImmersiveSequence() {
     const ov1 = document.getElementById('immersive-overlay-1');
     const ov2 = document.getElementById('immersive-overlay-2');
-    
-    // Set Text for Marquee
-    const track=document.getElementById('track-title').textContent;document.getElementById('imm-track-1').textContent=(track+' ').repeat(20);
-    const artist=document.getElementById('track-artist').textContent;document.getElementById('imm-artist-1').textContent=(artist+' ').repeat(20);
-    const album=currentAlbumName.toUpperCase();document.getElementById('imm-album-1').textContent=(album+' ').repeat(20);
 
-    // Show Overlay 1 (30s)
-    ov1.style.display = 'block';
-    ov2.style.display = 'none';
+    clearTimeout(immersiveSequenceTimeout);
+    clearTimeout(overlaySwitchTimeout);
+    populateMarqueeText();
+    generateWordCloud();
+
+    hideOverlay(ov2);
+    showOverlay(ov1);
+
+    overlaySwitchTimeout = setTimeout(() => {
+        hideOverlay(ov1);
+        generateWordCloud();
+        showOverlay(ov2);
+    }, Math.max(0, OVERLAY_1_DURATION_MS - OVERLAY_FADE_MS));
 
     immersiveSequenceTimeout = setTimeout(() => {
-        // Switch to Overlay 2 (30s)
-        ov1.style.display = 'none';
-        ov2.style.display = 'block';
-        generateWordCloud();
-    }, 30000);
+        hideOverlay(ov2);
+        setTimeout(() => {
+            if (document.body.classList.contains('immersive')) {
+                startImmersiveSequence();
+            }
+        }, OVERLAY_FADE_MS);
+    }, OVERLAY_1_DURATION_MS + OVERLAY_2_DURATION_MS - OVERLAY_FADE_MS);
 }
 
 function generateWordCloud() {
     const container = document.getElementById('word-cloud-container');
     container.innerHTML = '';
+    container.style.animation = 'none';
+    void container.offsetWidth;
+    container.style.animation = '';
     const words = [
         document.getElementById('track-title').textContent,
         document.getElementById('track-artist').textContent,
