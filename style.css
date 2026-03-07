@@ -57,8 +57,8 @@ body.immersive .bg-layer.active {
 
 /* Speeds: Album (25s) and Artist (30s) are faster than Song (45s) */
 .song-title { font-size: 8vw; font-weight: 300; animation: slideIn 45s linear infinite; }
-.artist-name { font-size: 6vw; font-weight: 900; animation: slideIn 30s linear infinite; }
-.album-title { font-size: 4vw; font-weight: 500; animation: slideIn 25s linear infinite; }
+.artist-name { font-size: 6vw; font-weight: 900; animation: slideIn 25s linear infinite; }
+.album-title { font-size: 4vw; font-weight: 500; animation: slideIn 30s linear infinite; }
 
 @keyframes slideIn {
     0% { transform: translateX(100%); opacity: 0; }
