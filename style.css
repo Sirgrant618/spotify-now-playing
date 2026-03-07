@@ -131,10 +131,10 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 }
 
 /* Marquee Styles (Overlay 1) */
-.marquee-group { position: absolute; bottom: 10%; width: 100%; display: flex; flex-direction: column; }
-.imm-text { white-space: nowrap; text-transform: uppercase; line-height: 1.0; opacity: 0.8; }
-.song-title { font-size: 11vw; font-weight: 200; animation: slideIn 80s linear infinite; }
-.artist-name { font-size: 7vw; font-weight: 800; animation: slideIn 60s linear infinite; }
+.marquee-group { position: absolute; bottom: 3%; width: 100%; display: flex; flex-direction: column; }
+.imm-text { white-space: nowrap; text-transform: uppercase; line-height: 0.8; opacity: 0.8; }
+.song-title { font-size: 16vw; font-weight: 200; animation: slideIn 80s linear infinite; }
+.artist-name { font-size: 8vw; font-weight: 800; animation: slideIn 60s linear infinite; }
 .album-title { font-size: 4vw; font-weight: 500; animation: slideIn 70s linear infinite; }
 
 @keyframes slideIn {
