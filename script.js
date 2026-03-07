@@ -191,9 +191,9 @@ function startImmersiveSequence() {
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
 
-    document.getElementById('imm-track-1').textContent = (track + ' ').repeat(20);
-    document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(20);
-    document.getElementById('imm-album-1').textContent = (album + ' ').repeat(20);
+    document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
+    document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
+    document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
 
     let showingFirst = true;
 
