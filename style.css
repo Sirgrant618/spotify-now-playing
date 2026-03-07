@@ -41,7 +41,7 @@ html, body {
 }
 
 body.immersive .bg-layer.active {
-    filter: blur(10px) brightness(0.25) saturate(0.8) grayscale(0.3);
+    filter: blur(0px) brightness(0.25) saturate(0.8) grayscale(0.3);
 }
 
 @keyframes bgMainMove { 0% { transform: scale(1.05); } 100% { transform: scale(1.15) translate(-1%, -1%); } }
