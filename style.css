@@ -95,7 +95,19 @@ body.immersive .bg-layer.active {
 body.immersive #track-img { opacity: 0; transform: scale(0.9) translateY(20px); filter: blur(20px); }
 body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 
-.immersive-content { position: absolute; inset: 0; z-index: 10; display: none; pointer-events: none; }
+.immersive-content { 
+    position: absolute; 
+    inset: 0; 
+    z-index: 10; 
+    display: none; 
+    pointer-events: none; 
+    opacity: 0; 
+    transition: opacity 5s ease-in-out; 
+}
+
+.immersive-content.fade-in {
+    opacity: 1;
+}
 
 /* Marquee Styles (Overlay 1) */
 .marquee-group { position: absolute; bottom: 10%; width: 100%; display: flex; flex-direction: column; }

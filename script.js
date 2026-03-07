@@ -134,23 +134,35 @@ function setupActivityWatchers() {
         window.addEventListener(e, handleUserActivity, { passive: true });
     });
 }
+
 function handleUserActivity() { exitImmersiveMode(); resetInactivityTimer(); }
+
 function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
     inactivityTimer = setTimeout(() => enterImmersiveMode(), IDLE_DELAY_MS);
 }
+
+// THIS FUNCTION WAS MISSING
 function enterImmersiveMode() {
     const player = document.getElementById('player-screen');
     if (!player || player.style.display === 'none') return;
     document.body.classList.add('immersive');
     startImmersiveSequence();
 }
+
 function exitImmersiveMode() {
     document.body.classList.remove('immersive');
     clearTimeout(immersiveSequenceTimeout);
-    document.getElementById('immersive-overlay-1').style.display = 'none';
-    document.getElementById('immersive-overlay-2').style.display = 'none';
+    
+    const ov1 = document.getElementById('immersive-overlay-1');
+    const ov2 = document.getElementById('immersive-overlay-2');
+    
+    ov1.style.display = 'none';
+    ov1.classList.remove('fade-in');
+    ov2.style.display = 'none';
+    ov2.classList.remove('fade-in');
 }
+
 function startImmersiveSequence() {
     const ov1 = document.getElementById('immersive-overlay-1');
     const ov2 = document.getElementById('immersive-overlay-2');
@@ -165,25 +177,42 @@ function startImmersiveSequence() {
 
     let showingFirst = true;
 
-    function switchVisual() {
+    async function switchVisual() {
+        // 1. Start Fade Out
+        const current = showingFirst ? ov1 : ov2;
+        const next = showingFirst ? ov2 : ov1;
+        
+        current.classList.remove('fade-in');
+
+        // 2. Wait 5s for the fade-out to finish
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        // 3. Swap Displays
+        current.style.display = 'none';
+        next.style.display = 'block';
+        
+        // FIX: Generate the cloud if the NEXT one to show is the second overlay
         if (showingFirst) {
-            ov1.style.display = 'none';
-            ov2.style.display = 'block';
             generateWordCloud();
-        } else {
-            ov2.style.display = 'none';
-            ov1.style.display = 'block';
         }
 
-        showingFirst = !showingFirst;
+        // 4. Trigger Fade In
+        setTimeout(() => {
+            next.classList.add('fade-in');
+        }, 50);
 
-        immersiveSequenceTimeout = setTimeout(switchVisual, 30000);
+        showingFirst = !showingFirst;
+        
+        // Set the next swap (total cycle remains 30s)
+        immersiveSequenceTimeout = setTimeout(switchVisual, 25000); 
     }
 
+    // Initial Start
     ov1.style.display = 'block';
+    setTimeout(() => ov1.classList.add('fade-in'), 50);
     ov2.style.display = 'none';
 
-    immersiveSequenceTimeout = setTimeout(switchVisual, 30000);
+    immersiveSequenceTimeout = setTimeout(switchVisual, 25000);
 }
 
 function generateWordCloud() {
