@@ -40,7 +40,6 @@ html, body {
     animation: bgMainMove 40s ease-in-out infinite alternate; 
 }
 
-/* In immersive mode, we make the artist image clearer but darker */
 body.immersive .bg-layer.active {
     filter: blur(10px) brightness(0.25) saturate(0.8) grayscale(0.3);
 }
@@ -75,18 +74,72 @@ body.immersive .bg-layer.active {
 body.immersive #track-img { opacity: 0; transform: scale(0.9) translateY(20px); filter: blur(20px); }
 body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 
-/* Marquee & Cloud Styles (Preserved) */
 .immersive-content { position: absolute; inset: 0; z-index: 10; display: none; pointer-events: none; }
+
+/* Marquee Styles (Overlay 1) */
 .marquee-group { position: absolute; bottom: 10%; width: 100%; display: flex; flex-direction: column; }
 .imm-text { white-space: nowrap; text-transform: uppercase; line-height: 1.1; opacity: 0.8; }
-.song-title { font-size: 9vw; font-weight: 900; animation: slideIn 50s linear infinite; }
+.song-title { font-size: 9vw; font-weight: 900; animation: slideIn 60s linear infinite; }
 .artist-name { font-size: 7vw; font-weight: 300; animation: slideIn 35s linear infinite; }
-.album-title { font-size: 4vw; font-weight: 700; animation: slideIn 28s linear infinite; }
+.album-title { font-size: 4vw; font-weight: 700; animation: slideIn 40s linear infinite; }
 
 @keyframes slideIn {
     0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
 }
 
+/* Visualization #2 (The Word Block) */
+#word-cloud-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.word-block-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 140%; /* Oversized for coverage */
+    animation: moveUpwards 40s linear forwards;
+    opacity: 0.4; /* 60% transparent overall */
+}
+
+.cloud-row {
+    font-size: clamp(1.5rem, 3.5vw, 3rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    white-space: nowrap;
+    line-height: 1.4;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    
+    /* Animation sequence: Fade in initially, then fade out line-by-line */
+    animation: 
+        fadeInRow 2s ease-out forwards,
+        fadeOutBottomUp 1.5s ease-in forwards;
+    
+    /* Fade out starts at 24s. Rows at bottom (higher index) fade first */
+    animation-delay: 0s, calc(24s - (var(--row-index) * 0.15s));
+}
+
+@keyframes moveUpwards {
+    0% { transform: translateY(30vh); }
+    100% { transform: translateY(-50vh); }
+}
+
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOutBottomUp {
+    from { opacity: 1; filter: blur(0); }
+    to { opacity: 0; filter: blur(15px); }
+}
+
+/* Auth Screens */
 .glass-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 40px; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
 #login-button { background: #fff; color: #000; border: none; padding: 12px 40px; font-weight: 900; cursor: pointer; letter-spacing: 2px; }

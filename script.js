@@ -53,7 +53,7 @@ async function handleCallback(code) {
         if (data.access_token) {
             localStorage.setItem('access_token', data.access_token);
             if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-            window.history.pushState({}, document.title, '/spotify-now-playing/');
+            window.history.pushState({}, document.title, window.location.pathname);
             showPlayer(); startPolling(data.access_token); resetInactivityTimer();
         }
     } catch (err) { console.error(err); }
@@ -82,7 +82,7 @@ async function getArtistImage(token, artistId) {
             headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
-        return data.images[0]?.url || ""; // Returns high-res artist image
+        return data.images[0]?.url || ""; 
     } catch (e) { return ""; }
 }
 
@@ -110,7 +110,6 @@ async function updateNowPlaying(token) {
             document.getElementById('track-artist').textContent = item.artists[0].name.toUpperCase();
             document.getElementById('track-img').src = item.album.images[0].url;
 
-            // Fetch and set Artist Image for Background
             const artistImgUrl = await getArtistImage(token, item.artists[0].id);
             swapBackground(artistImgUrl || item.album.images[0].url); 
             
@@ -172,18 +171,33 @@ function startImmersiveSequence() {
         generateWordCloud();
     }, 30000);
 }
+
 function generateWordCloud() {
     const container = document.getElementById('word-cloud-container');
     container.innerHTML = '';
-    const words = [document.getElementById('track-title').textContent, document.getElementById('track-artist').textContent, currentAlbumName.toUpperCase()];
-    for (let i = 0; i < 120; i++) {
-        const span = document.createElement('span');
-        span.className = 'cloud-word';
-        span.textContent = words[i % 3] + " ";
-        span.style.animationDelay = `${i * 0.15}s`;
-        container.appendChild(span);
+    
+    const track = document.getElementById('track-title').textContent;
+    const artist = document.getElementById('track-artist').textContent;
+    const album = currentAlbumName.toUpperCase();
+    
+    // Visualization #2 logic: Word block with dots
+    const unit = `${track} • ${artist} • ${album} • `;
+    const fullRowText = unit.repeat(15); 
+
+    const scrollWrapper = document.createElement('div');
+    scrollWrapper.className = 'word-block-wrapper';
+
+    for (let i = 0; i < 40; i++) {
+        const row = document.createElement('div');
+        row.className = 'cloud-row';
+        row.textContent = fullRowText;
+        row.style.setProperty('--row-index', i);
+        scrollWrapper.appendChild(row);
     }
+
+    container.appendChild(scrollWrapper);
 }
+
 function showPlayer() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('player-screen').style.display = 'block';
