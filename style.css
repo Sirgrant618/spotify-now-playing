@@ -1,84 +1,114 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;700;900&display=swap');
 
 :root {
     --spot-1: #ff0046; 
     --spot-2: #00adef;
     --spot-3: #ff8500;
+    --text-color: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.95);
+    --panel-bg: rgba(255, 255, 255, 0.06);
+    --panel-border: rgba(255, 255, 255, 0.12);
 }
+
+* { box-sizing: border-box; }
 
 html, body {
     margin: 0; padding: 0;
     width: 100%; height: 100%;
-    overflow: hidden; background: #000;
+    overflow: hidden;
+    background: #000;
+    color: var(--text-color);
     font-family: 'Inter', sans-serif;
 }
 
-/* --- BACKGROUNDS --- */
-.bg-layer {
-    position: absolute; inset: -15%;
-    background-size: cover; background-position: center;
-    opacity: 0; filter: blur(50px) brightness(0.4) saturate(1.2);
-    transition: opacity 2s ease, filter 2.5s ease;
+/* --- BACKGROUND SYSTEM --- */
+#bg-wrap {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #000;
 }
-.bg-layer.active { opacity: 1; animation: bgMove 30s infinite alternate; }
+
+.bg-layer {
+    position: absolute; top: -15%; left: -15%; width: 130%; height: 130%;
+    background-size: cover; background-position: center center; background-repeat: no-repeat;
+    opacity: 0; transform: scale(1.1);
+    filter: blur(50px) brightness(0.42) saturate(1.2);
+    transition: opacity 2s ease, filter 2.5s ease-in-out;
+    will-change: opacity, filter;
+}
+
+.bg-layer.active { opacity: 1; animation: bgMainMove 30s ease-in-out infinite alternate; }
 
 body.immersive .bg-layer.active {
     filter: blur(0px) brightness(0.35) saturate(1) grayscale(1);
 }
 
-/* --- OVERLAY CONTROL --- */
-.overlay-container {
-    position: absolute; inset: 0; z-index: 10;
-    display: none; opacity: 0; transition: opacity 2s ease;
-    pointer-events: none;
+/* --- IMMERSIVE OVERLAYS --- */
+.immersive-content {
+    position: absolute; inset: 0; z-index: 10; display: none;
+    pointer-events: none; mix-blend-mode: multiply; opacity: 0.7;
 }
-body.show-v1 #immersive-v1, body.show-v2 #immersive-v2 { display: flex; opacity: 1; }
 
 /* Overlay 1: Marquee */
-#immersive-v1 { flex-direction: column; justify-content: flex-end; padding-bottom: 5vh; }
-.marquee-group { display: flex; flex-direction: column; gap: 3px; }
-.m-line { 
-    white-space: nowrap; mix-blend-mode: multiply; 
-    opacity: 0.5; color: #fff; display: flex;
+.marquee-group {
+    position: absolute; bottom: 8%; width: 100%;
+    display: flex; flex-direction: column; gap: 3px;
 }
-.m-title { font-weight: 100; font-size: 9vh; animation: marquee 120s linear infinite; }
-.m-artist { font-weight: 900; font-size: 7vh; animation: marquee 60s linear infinite; }
-.m-album { font-weight: 400; font-size: 4vh; animation: marquee 90s linear infinite; }
 
-@keyframes marquee {
+.imm-text { white-space: nowrap; text-transform: uppercase; line-height: 1; }
+
+/* Speeds: Album (25s) and Artist (30s) are faster than Song (45s) */
+.song-title { font-size: 8vw; font-weight: 300; animation: slideIn 45s linear infinite; }
+.artist-name { font-size: 6vw; font-weight: 900; animation: slideIn 30s linear infinite; }
+.album-title { font-size: 4vw; font-weight: 500; animation: slideIn 25s linear infinite; }
+
+@keyframes slideIn {
     0% { transform: translateX(100%); opacity: 0; }
-    5% { opacity: 0.5; }
-    100% { transform: translateX(-100%); }
+    5% { opacity: 1; }
+    95% { opacity: 1; }
+    100% { transform: translateX(-150%); opacity: 0; }
 }
 
-/* Overlay 2: Word Wall */
-#immersive-v2 { padding: 5vh; overflow: hidden; align-items: flex-start; }
-#word-wall { 
-    display: flex; flex-wrap: wrap; gap: 15px; 
-    mix-blend-mode: multiply; opacity: 0.6; color: #fff;
-    animation: wallDrift 30s linear forwards;
-}
-.word { opacity: 0; font-weight: 900; font-size: 5vh; text-transform: uppercase; animation: wordFade 0.5s forwards; }
-
-@keyframes wordFade { to { opacity: 1; } }
-@keyframes wallDrift {
-    from { transform: translateY(10vh); }
-    to { transform: translateY(-40vh); opacity: 0; }
+/* Overlay 2: Word Cloud */
+#word-cloud-container {
+    padding: 4vw; display: flex; flex-wrap: wrap; gap: 12px;
+    align-content: flex-start; animation: riseUp 30s linear forwards;
 }
 
-/* Standard UI */
-.zune-layout { display: flex; align-items: center; gap: 40px; height: 100vh; padding: 0 8vw; }
-#track-img { width: 30vw; height: 30vw; border: 6px solid #fff; transition: 1s; }
-.text-meta { color: #fff; transition: 0.8s; }
-body.immersive #track-img { opacity: 0; filter: blur(20px); transform: scale(0.9); }
-body.immersive .text-meta { opacity: 0; transform: translateX(20px); }
+.cloud-word { font-size: 2.8vw; text-transform: uppercase; opacity: 0; font-weight: 700; animation: fadeInWord 0.4s ease forwards; }
 
-/* Spotlight & Login Styles (Simplified for brevity) */
-.glass-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); padding: 40px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-.spotlight-container { position: absolute; inset: 0; mix-blend-mode: color; opacity: 0; transition: 2s; }
+@keyframes fadeInWord { to { opacity: 1; } }
+@keyframes riseUp {
+    from { transform: translateY(15%); }
+    to { transform: translateY(-40%); opacity: 0; }
+}
+
+/* --- REST OF UI --- */
+.spotlight-container {
+    position: absolute; inset: 0; z-index: 1; opacity: 0;
+    pointer-events: none; transition: opacity 3s ease-in-out;
+    mix-blend-mode: color; 
+}
+
 body.immersive .spotlight-container { opacity: 1; }
-.spotlight { position: absolute; width: 80vw; height: 80vw; filter: blur(100px); border-radius: 50%; opacity: 0.6; }
-.s1 { background: radial-gradient(var(--spot-1), transparent); top: -10%; left: -10%; }
-.s2 { background: radial-gradient(var(--spot-2), transparent); bottom: -10%; right: -10%; }
 
-@keyframes bgMove { from { transform: scale(1.1); } to { transform: scale(1.2) translate(-2%, -2%); } }
+.spotlight { position: absolute; width: 90vw; height: 90vw; border-radius: 50%; filter: blur(80px); opacity: 0.7; }
+.s1 { background: radial-gradient(circle, var(--spot-1) 0%, transparent 70%); top: -20%; left: -10%; animation: sweep1 22s infinite alternate ease-in-out; }
+.s2 { background: radial-gradient(circle, var(--spot-2) 0%, transparent 70%); bottom: -20%; right: -10%; animation: sweep2 28s infinite alternate ease-in-out; }
+.s3 { background: radial-gradient(circle, var(--spot-3) 0%, transparent 70%); top: 30%; left: 30%; animation: sweep3 20s infinite alternate ease-in-out; }
+
+@keyframes sweep1 { 0% { transform: translate(0, 0); } 100% { transform: translate(50vw, 30vh); } }
+@keyframes sweep2 { 0% { transform: translate(0, 0); } 100% { transform: translate(-40vw, -40vh); } }
+@keyframes sweep3 { 0% { transform: translate(0, 0); } 100% { transform: translate(-20vw, 20vh); } }
+
+#player-screen { width: 100%; height: 100%; position: relative; z-index: 2; }
+.zune-layout { display: flex; align-items: center; gap: 22px; width: 100%; height: 100vh; padding: 8vh 8vw; }
+#track-img { width: min(34vw, 450px); height: min(34vw, 450px); border: 6px solid var(--border-color); box-shadow: 0 24px 80px rgba(0,0,0,0.4); transition: all 0.8s ease; }
+.text-meta { color: #fff; text-shadow: 0 6px 30px rgba(0,0,0,0.45); transition: all 0.7s ease; }
+#track-title { margin: 0; font-size: clamp(3rem, 7vw, 6.2rem); font-weight: 900; line-height: 0.92; text-transform: uppercase; }
+#track-artist { margin: 10px 0 0 0; font-size: clamp(1.6rem, 4vw, 4rem); font-weight: 700; text-transform: uppercase; }
+
+body.immersive #track-img { opacity: 0; transform: scale(0.96); filter: grayscale(1) blur(20px); }
+body.immersive .text-meta { opacity: 0; transform: translate3d(30px, 0, 0); }
+
+@keyframes bgMainMove { 0% { transform: scale(1.1); } 100% { transform: scale(1.18) translate(-2%, -2%); } }
+
+.glass-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 36px; background: var(--panel-bg); backdrop-filter: blur(18px); }
