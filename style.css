@@ -232,26 +232,33 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     animation: driftLeftToRight 25s forwards;
 }
 
+/* --- UPDATED STACKED DRIFT ANIMATIONS --- */
+
+/* --- UPDATED STACKED DRIFT ANIMATIONS --- */
+
 @keyframes driftRightToLeft {
     0% {
         transform: translateX(150vw);
         opacity: 0;
-        animation-timing-function: cubic-bezier(0.18, 0.85, 0.22, 1);
+        /* Rapid entrance */
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    6% {
+    10% {
         opacity: 1;
     }
 
-    18% {
-        transform: translateX(25vw);
-        animation-timing-function: linear;
+    /* 20% to 80% is the "Coast Zone" */
+    20% {
+        transform: translateX(30vw);
+        animation-timing-function: linear; /* Constant slow drift through the center */
     }
 
-    72% {
-        transform: translateX(-25vw);
+    80% {
+        transform: translateX(-30vw);
         opacity: 1;
-        animation-timing-function: cubic-bezier(0.7, 0, 1, 1);
+        /* Smooth acceleration exit */
+        animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0);
     }
 
     100% {
@@ -264,22 +271,22 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     0% {
         transform: translateX(-150vw);
         opacity: 0;
-        animation-timing-function: cubic-bezier(0.18, 0.85, 0.22, 1);
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    6% {
+    10% {
         opacity: 1;
     }
 
-    18% {
-        transform: translateX(-25vw);
+    20% {
+        transform: translateX(-30vw);
         animation-timing-function: linear;
     }
 
-    72% {
-        transform: translateX(25vw);
+    80% {
+        transform: translateX(30vw);
         opacity: 1;
-        animation-timing-function: cubic-bezier(0.7, 0, 1, 1);
+        animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0);
     }
 
     100% {
