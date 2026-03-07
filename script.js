@@ -254,17 +254,17 @@ function generateWordCloud() {
         row.className = 'cloud-row';
         row.style.setProperty('--row-index', i);
         
-        // Stagger the horizontal start of each row
-        row.style.paddingLeft = `${(i % 4) * 20}px`;
+        // RANDOM STAGGER:
+        // Generates a random offset between 0 and 150 pixels for every single row
+        const randomOffset = Math.floor(Math.random() * 150);
+        row.style.paddingLeft = `${randomOffset}px`;
 
-        // Repeat the word sequence for the row
         for (let j = 0; j < 6; j++) { 
             words.forEach((word, wordIndex) => {
                 const span = document.createElement('span');
                 span.className = 'word-unit';
                 span.textContent = word + ' ';
                 
-                // Calculate a delay so words fade in one by one across the whole block
                 const appearanceDelay = (i * 0.1) + (j * words.length + wordIndex) * 0.05;
                 span.style.setProperty('--word-delay', `${appearanceDelay}s`);
                 
