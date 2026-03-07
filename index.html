@@ -17,18 +17,6 @@
             <div class="spotlight s3"></div>
         </div>
 
-        <div id="immersive-v1" class="overlay-container">
-            <div class="marquee-group">
-                <div class="m-line m-title" id="v1-title"></div>
-                <div class="m-line m-artist" id="v1-artist"></div>
-                <div class="m-line m-album" id="v1-album"></div>
-            </div>
-        </div>
-
-        <div id="immersive-v2" class="overlay-container">
-            <div id="word-wall"></div>
-        </div>
-
         <div class="bg-vignette"></div>
         <div class="bg-noise"></div>
     </div>
@@ -39,6 +27,18 @@
     </div>
 
     <div id="player-screen" style="display: none;">
+        <div id="immersive-overlay-1" class="immersive-content">
+            <div class="marquee-group">
+                <div id="imm-track-1" class="imm-text song-title"></div>
+                <div id="imm-artist-1" class="imm-text artist-name"></div>
+                <div id="imm-album-1" class="imm-text album-title"></div>
+            </div>
+        </div>
+
+        <div id="immersive-overlay-2" class="immersive-content">
+            <div id="word-cloud-container"></div>
+        </div>
+
         <div class="zune-layout">
             <div class="art-section">
                 <img id="track-img" src="" alt="Album Art" />
