@@ -174,64 +174,71 @@ function exitImmersiveMode() {
     document.body.classList.remove('immersive');
     clearTimeout(immersiveSequenceTimeout);
     
-    const ov1 = document.getElementById('immersive-overlay-1');
-    const ov2 = document.getElementById('immersive-overlay-2');
-    
-    ov1.style.display = 'none';
-    ov1.classList.remove('fade-in');
-    ov2.style.display = 'none';
-    ov2.classList.remove('fade-in');
+    ['1', '2', '3'].forEach(num => {
+        const ov = document.getElementById(`immersive-overlay-${num}`);
+        ov.style.display = 'none';
+        ov.classList.remove('fade-in');
+    });
 }
 
+let immersiveStep = 0; // Global or scoped inside startImmersiveSequence
+
 function startImmersiveSequence() {
-    const ov1 = document.getElementById('immersive-overlay-1');
-    const ov2 = document.getElementById('immersive-overlay-2');
+    const overlays = [
+        document.getElementById('immersive-overlay-1'),
+        document.getElementById('immersive-overlay-2'),
+        document.getElementById('immersive-overlay-3')
+    ];
 
     const track = document.getElementById('track-title').textContent;
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
 
+    // Prep Overlay 1 (Marquee)
     document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
     document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
     document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
 
-    let showingFirst = true;
+    // Prep Overlay 3 (Stacked Drift)
+    const dTrack = document.getElementById('drift-track');
+    const dArtist = document.getElementById('drift-artist');
+    const dAlbum = document.getElementById('drift-album');
+    
+    dTrack.textContent = track;
+    dArtist.textContent = artist;
+    dAlbum.textContent = album;
 
     async function switchVisual() {
-        // 1. Start Fade Out
-        const current = showingFirst ? ov1 : ov2;
-        const next = showingFirst ? ov2 : ov1;
-        
-        current.classList.remove('fade-in');
+        const current = overlays[immersiveStep % 3];
+        immersiveStep++;
+        const next = overlays[immersiveStep % 3];
 
-        // 2. Wait 5s for the fade-out to finish
-        await new Promise(resolve => setTimeout(resolve, 5500));
+        current.classList.remove('fade-in');
+        await new Promise(r => setTimeout(r, 5500));
         
-        // 3. Swap Displays
         current.style.display = 'none';
-        next.style.display = 'block';
+        next.style.display = (immersiveStep % 3 === 2) ? 'flex' : 'block';
+
+        if (immersiveStep % 3 === 1) generateWordCloud();
         
-        // FIX: Generate the cloud if the NEXT one to show is the second overlay
-        if (showingFirst) {
-            generateWordCloud();
+        if (immersiveStep % 3 === 2) {
+            // Trigger Drift Animations with staggered delays
+            dTrack.className = 'drift-text'; dArtist.className = 'drift-text'; dAlbum.className = 'drift-text';
+            void dTrack.offsetWidth; // Reflow
+            dTrack.classList.add('drift-rtl');
+            dArtist.classList.add('drift-ltr'); dArtist.style.animationDelay = '0.6s';
+            dAlbum.classList.add('drift-rtl'); dAlbum.style.animationDelay = '1.2s';
         }
 
-        // 4. Trigger Fade In
-        setTimeout(() => {
-            next.classList.add('fade-in');
-        }, 50);
-
-        showingFirst = !showingFirst;
-        
-        // Set the next swap (total cycle remains 30s)
-        immersiveSequenceTimeout = setTimeout(switchVisual, 35000); 
+        setTimeout(() => next.classList.add('fade-in'), 50);
+        immersiveSequenceTimeout = setTimeout(switchVisual, 35000);
     }
 
     // Initial Start
-    ov1.style.display = 'block';
-    setTimeout(() => ov1.classList.add('fade-in'), 50);
-    ov2.style.display = 'none';
-
+    overlays.forEach(o => o.style.display = 'none');
+    overlays[0].style.display = 'block';
+    setTimeout(() => overlays[0].classList.add('fade-in'), 50);
+    immersiveStep = 0;
     immersiveSequenceTimeout = setTimeout(switchVisual, 35000);
 }
 
