@@ -219,17 +219,20 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     will-change: transform;
 }
 
-/* Rows 1 and 3 drift one way, Row 2 drifts the other */
-.row-1, .row-3 { animation: slowDriftLTR 40s linear infinite; }
-.row-2 { animation: slowDriftRTL 40s linear infinite; }
+/* Row 1 and 3 (moveRTL) enter from the RIGHT, so the row should drift RIGHT to LEFT.
+   Row 2 (moveLTR) enters from the LEFT, so the row should drift LEFT to RIGHT.
+*/
+.row-1, .row-3 { animation: slowDriftRTL 40s linear infinite; }
+.row-2 { animation: slowDriftLTR 40s linear infinite; }
+
+@keyframes slowDriftRTL {
+    from { transform: translateX(10vw); }
+    to { transform: translateX(-10vw); }
+}
 
 @keyframes slowDriftLTR {
-    from { transform: translateX(-8vw); }
-    to { transform: translateX(8vw); }
-}
-@keyframes slowDriftRTL {
-    from { transform: translateX(8vw); }
-    to { transform: translateX(-8vw); }
+    from { transform: translateX(-10vw); }
+    to { transform: translateX(10vw); }
 }
 
 /* --- THE CHILD: The "Enter-Pause-Exit" Logic --- */
