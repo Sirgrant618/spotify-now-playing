@@ -4,13 +4,19 @@ const scope = 'user-read-currently-playing user-read-playback-state';
 
 let pollInterval = null;
 let currentTrackId = null;
-let currentAlbumName = "";
 let activeBgId = 'bg-a';
 let inactivityTimer = null;
-let immersiveSequenceTimeout = null;
 const IDLE_DELAY_MS = 5000;
 
-/* --- AUTH --- */
+// Immersive Cycle State
+let immersiveModeIndex = 0; // 0 = Marquee, 1 = Fill
+let cycleInterval = null;
+
+/* =========================
+   AUTH & BOOTSTRAP
+========================= */
+// ... (Keep existing redirectToSpotify, bootstrapAuth, handleCallback, refreshAccessToken)
+// Note: Ensure the redirect logic in redirectToSpotify uses valid Spotify URLs
 async function redirectToSpotify() {
     const verifier = generateRandomString(64);
     localStorage.setItem('code_verifier', verifier);
@@ -22,134 +28,93 @@ async function redirectToSpotify() {
     window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
-const urlParams = new URLSearchParams(window.location.search);
-const code = urlParams.get('code');
-setupActivityWatchers();
-bootstrapAuth();
-
 async function bootstrapAuth() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
     if (code) { await handleCallback(code); return; }
     const accessToken = localStorage.getItem('access_token');
-    const refreshToken = localStorage.getItem('refresh_token');
     if (accessToken) { showPlayer(); startPolling(accessToken); resetInactivityTimer(); return; }
-    if (refreshToken) {
-        const newAccessToken = await refreshAccessToken();
-        if (newAccessToken) { showPlayer(); startPolling(newAccessToken); resetInactivityTimer(); }
-    }
-}
-
-async function handleCallback(code) {
-    try {
-        const codeVerifier = localStorage.getItem('code_verifier');
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                client_id: clientId, grant_type: 'authorization_code',
-                code, redirect_uri: redirectUri, code_verifier: codeVerifier
-            })
-        });
-        const data = await response.json();
-        if (data.access_token) {
-            localStorage.setItem('access_token', data.access_token);
-            if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
-            window.history.pushState({}, document.title, '/spotify-now-playing/');
-            showPlayer(); startPolling(data.access_token); resetInactivityTimer();
-        }
-    } catch (err) { console.error(err); showReconnectScreen(); }
-}
-
-async function refreshAccessToken() {
     const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return null;
-    try {
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ client_id: clientId, grant_type: 'refresh_token', refresh_token: refreshToken })
-        });
-        const data = await response.json();
-        if (!response.ok || !data.access_token) { clearSpotifySession(); return null; }
-        localStorage.setItem('access_token', data.access_token);
-        return data.access_token;
-    } catch (err) { return null; }
+    if (refreshToken) { const token = await refreshAccessToken(); if (token) { showPlayer(); startPolling(token); resetInactivityTimer(); } }
 }
 
-/* --- IMMERSIVE LOGIC --- */
-function setupActivityWatchers() {
-    ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(e => {
-        window.addEventListener(e, handleUserActivity, { passive: true });
-    });
-}
-
-function handleUserActivity() {
-    exitImmersiveMode();
-    resetInactivityTimer();
-}
-
+/* =========================
+   IMMERSIVE LOGIC
+========================= */
 function resetInactivityTimer() {
     clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => enterImmersiveMode(), IDLE_DELAY_MS);
+    inactivityTimer = setTimeout(enterImmersiveMode, IDLE_DELAY_MS);
 }
 
 function enterImmersiveMode() {
     const player = document.getElementById('player-screen');
     if (!player || player.style.display === 'none') return;
     document.body.classList.add('immersive');
-    startImmersiveSequence();
+    startImmersiveCycle();
 }
 
 function exitImmersiveMode() {
     document.body.classList.remove('immersive');
-    clearTimeout(immersiveSequenceTimeout);
-    document.getElementById('immersive-overlay-1').style.display = 'none';
-    document.getElementById('immersive-overlay-2').style.display = 'none';
+    stopImmersiveCycle();
 }
 
-function startImmersiveSequence() {
-    const ov1 = document.getElementById('immersive-overlay-1');
-    const ov2 = document.getElementById('immersive-overlay-2');
-    
-    // Set Text for Marquee
-    document.getElementById('imm-track-1').textContent = document.getElementById('track-title').textContent;
-    document.getElementById('imm-artist-1').textContent = document.getElementById('track-artist').textContent;
-    document.getElementById('imm-album-1').textContent = currentAlbumName.toUpperCase();
-
-    // Show Overlay 1 (30s)
-    ov1.style.display = 'block';
-    ov2.style.display = 'none';
-
-    immersiveSequenceTimeout = setTimeout(() => {
-        // Switch to Overlay 2 (30s)
-        ov1.style.display = 'none';
-        ov2.style.display = 'block';
-        generateWordCloud();
-    }, 30000);
+function startImmersiveCycle() {
+    stopImmersiveCycle();
+    runCycle();
+    cycleInterval = setInterval(runCycle, 30000);
 }
 
-function generateWordCloud() {
-    const container = document.getElementById('word-cloud-container');
-    container.innerHTML = '';
-    const words = [
-        document.getElementById('track-title').textContent,
-        document.getElementById('track-artist').textContent,
-        currentAlbumName.toUpperCase()
-    ];
-    for (let i = 0; i < 120; i++) {
-        const span = document.createElement('span');
-        span.className = 'cloud-word';
-        span.textContent = words[i % 3] + " ";
-        span.style.animationDelay = `${i * 0.15}s`;
-        container.appendChild(span);
+function stopImmersiveCycle() {
+    clearInterval(cycleInterval);
+    document.getElementById('immersive-marquee').classList.remove('active-mode');
+    document.getElementById('immersive-fill').classList.remove('active-mode');
+}
+
+function runCycle() {
+    const marquee = document.getElementById('immersive-marquee');
+    const fill = document.getElementById('immersive-fill');
+
+    if (immersiveModeIndex === 0) {
+        fill.classList.remove('active-mode');
+        marquee.classList.add('active-mode');
+        immersiveModeIndex = 1;
+    } else {
+        marquee.classList.remove('active-mode');
+        fill.classList.add('active-mode');
+        setupWordFill(); // Re-trigger word animation
+        immersiveModeIndex = 0;
     }
 }
 
-/* --- POLLING & UI --- */
-function startPolling(token) {
-    updateNowPlaying(token);
-    pollInterval = setInterval(() => updateNowPlaying(localStorage.getItem('access_token')), 5000);
+function setupMarquee(title, artist, album) {
+    const s = `<span>${title} &nbsp; ${title} &nbsp;</span>`;
+    const ar = `<span>${artist} &nbsp; ${artist} &nbsp;</span>`;
+    const al = `<span>${album} &nbsp; ${album} &nbsp;</span>`;
+    
+    document.getElementById('m-song').innerHTML = s.repeat(10);
+    document.getElementById('m-artist').innerHTML = ar.repeat(15);
+    document.getElementById('m-album').innerHTML = al.repeat(12);
 }
 
+function setupWordFill() {
+    const container = document.getElementById('fill-container');
+    container.innerHTML = '';
+    const text = (document.getElementById('track-title').textContent + " " + 
+                  document.getElementById('track-artist').textContent + " " + 
+                  (window.currentAlbumName || "")).split(' ');
+    
+    for (let i = 0; i < 200; i++) {
+        const word = document.createElement('span');
+        word.className = 'fill-word';
+        word.textContent = text[i % text.length];
+        word.style.animationDelay = `${i * 0.1}s`;
+        container.appendChild(word);
+    }
+}
+
+/* =========================
+   POLLING & UI
+========================= */
 async function updateNowPlaying(token) {
     try {
         const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
@@ -162,35 +127,49 @@ async function updateNowPlaying(token) {
         const item = data.item;
         if (item.id !== currentTrackId) {
             currentTrackId = item.id;
-            currentAlbumName = item.album.name;
+            window.currentAlbumName = item.album.name;
+            
+            document.getElementById('track-title').textContent = item.name.toUpperCase();
+            const artistName = item.artists[0].name.toUpperCase();
+            document.getElementById('track-artist').textContent = artistName;
+            document.getElementById('track-img').src = item.album.images[0].url;
+
+            setupMarquee(item.name.toUpperCase(), artistName, item.album.name.toUpperCase());
             exitImmersiveMode();
             resetInactivityTimer();
 
-            document.getElementById('track-title').textContent = item.name.toUpperCase();
-            document.getElementById('track-artist').textContent = item.artists[0].name.toUpperCase();
-            document.getElementById('track-img').src = item.album.images[0].url;
-            
-            swapBackground(item.album.images[0].url);
-            applyPaletteFromImage(item.album.images[0].url);
+            // Background Logic: Fetch Artist Image
+            let bgUrl = item.album.images[0].url;
+            const artistRes = await fetch(`https://api.spotify.com/v1/artists/${item.artists[0].id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (artistRes.ok) {
+                const aData = await artistRes.json();
+                if (aData.images.length > 0) bgUrl = aData.images[0].url;
+            }
+            swapBackground(bgUrl);
         }
-    } catch (err) { console.error(err); }
+    } catch (e) { console.error(e); }
 }
 
-function showPlayer() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('player-screen').style.display = 'block';
+// ... (Keep existing setupActivityWatchers, handleUserActivity, swapBackground, helpers)
+
+function setupActivityWatchers() {
+    ['mousemove', 'keydown', 'touchstart'].forEach(e => {
+        window.addEventListener(e, () => { exitImmersiveMode(); resetInactivityTimer(); });
+    });
 }
 
 function swapBackground(imageUrl) {
     const active = document.getElementById(activeBgId);
     activeBgId = activeBgId === 'bg-a' ? 'bg-b' : 'bg-a';
     const inactive = document.getElementById(activeBgId);
-    inactive.style.backgroundImage = `url("${imageUrl}")`;
+    inactive.style.backgroundImage = `url(${imageUrl})`;
     inactive.classList.add('active');
     active.classList.remove('active');
 }
 
-/* --- HELPERS --- */
+// Helper for crypto strings
 function generateRandomString(length) {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
@@ -203,4 +182,29 @@ async function generateCodeChallenge(verifier) {
     return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
-// ... include applyPaletteFromImage, extractPalette, etc from your original code here ...
+async function handleCallback(code) {
+    const codeVerifier = localStorage.getItem('code_verifier');
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            client_id: clientId, grant_type: 'authorization_code', code,
+            redirect_uri: redirectUri, code_verifier: codeVerifier
+        })
+    });
+    const data = await response.json();
+    if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        window.history.pushState({}, document.title, "/");
+        bootstrapAuth();
+    }
+}
+
+function showPlayer() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('player-screen').style.display = 'block';
+}
+
+bootstrapAuth();
+setupActivityWatchers();
