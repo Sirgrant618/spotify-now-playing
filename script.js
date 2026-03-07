@@ -177,7 +177,8 @@ function resetInactivityTimer() {
 }
 
 function enterImmersiveMode() {
-    if (document.getElementById('player-screen').style.display === 'none') return;
+    const player = document.getElementById('player-screen');
+    if (!player || player.style.display === 'none') return;
     document.body.classList.add('immersive');
 }
 
@@ -247,46 +248,49 @@ async function updateNowPlaying(token, hasRetried = false) {
         const artistName = item.artists?.[0]?.name || 'UNKNOWN ARTIST';
         const albumArt = item.album?.images?.[0]?.url || '';
 
-        document.getElementById('track-title').textContent = trackTitle.toUpperCase();
-        document.getElementById('track-artist').textContent = artistName.toUpperCase();
-        document.getElementById('track-img').src = albumArt;
-        document.getElementById('track-img').alt = `${trackTitle} album art`;
-
-        showPlayer();
-
+        // Check if the track has actually changed
         const isTrackChange = trackId !== currentTrackId;
-        if (!isTrackChange) return;
 
-        currentTrackId = trackId;
+        if (isTrackChange) {
+            currentTrackId = trackId;
 
-        let backgroundImage = albumArt;
+            // Trigger "Details Mode" visibility on track change
+            exitImmersiveMode();
+            resetInactivityTimer();
 
-        const primaryArtistId = item.artists?.[0]?.id;
-        if (primaryArtistId) {
-            try {
-                const artistRes = await fetch(`https://api.spotify.com/v1/artists/${primaryArtistId}`, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('access_token') || token}`
+            // Update UI
+            document.getElementById('track-title').textContent = trackTitle.toUpperCase();
+            document.getElementById('track-artist').textContent = artistName.toUpperCase();
+            document.getElementById('track-img').src = albumArt;
+            document.getElementById('track-img').alt = `${trackTitle} album art`;
+
+            showPlayer();
+
+            // Handle Backgrounds and Palette
+            let backgroundImage = albumArt;
+            const primaryArtistId = item.artists?.[0]?.id;
+
+            if (primaryArtistId) {
+                try {
+                    const artistRes = await fetch(`https://api.spotify.com/v1/artists/${primaryArtistId}`, {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('access_token') || token}`
+                        }
+                    });
+
+                    if (artistRes.ok) {
+                        const artistData = await artistRes.json();
+                        if (artistData?.images?.length) {
+                            backgroundImage = artistData.images[0].url;
+                        }
                     }
-                });
-
-                if (artistRes.ok) {
-                    const artistData = await artistRes.json();
-                    if (artistData?.images?.length) {
-                        backgroundImage = artistData.images[0].url;
-                    }
+                } catch (artistErr) {
+                    console.warn('Artist image fetch failed, using album art fallback.', artistErr);
                 }
-            } catch (artistErr) {
-                console.warn('Artist image fetch failed, using album art fallback.', artistErr);
             }
-        }
 
-        if (backgroundImage) {
-            swapBackground(backgroundImage);
-        }
-
-        if (albumArt) {
-            applyPaletteFromImage(albumArt);
+            if (backgroundImage) swapBackground(backgroundImage);
+            if (albumArt) applyPaletteFromImage(albumArt);
         }
     } catch (err) {
         console.error('Error updating now playing:', err);
@@ -442,13 +446,13 @@ function colorDistance(a, b) {
 function setWashColors(c1, c2, c3) {
     const root = document.documentElement;
 
-    root.style.setProperty('--wash-1', toRgba(c1, 0.34));
-    root.style.setProperty('--wash-2', toRgba(c2, 0.28));
-    root.style.setProperty('--wash-3', toRgba(c3, 0.24));
+    root.style.setProperty('--spot-1', toRgb(c1));
+    root.style.setProperty('--spot-2', toRgb(c2));
+    root.style.setProperty('--spot-3', toRgb(c3));
 }
 
-function toRgba(color, alpha) {
-    return `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+function toRgb(color) {
+    return `rgb(${color.r}, ${color.g}, ${color.b})`;
 }
 
 /* =========================
