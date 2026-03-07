@@ -1,210 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap');
 
 :root {
-    /* Spotlight colors */
     --spot-1: #ff0046; 
     --spot-2: #00adef;
     --spot-3: #ff8500;
     --text-color: #ffffff;
     --border-color: rgba(255, 255, 255, 0.95);
-    --panel-bg: rgba(255, 255, 255, 0.06);
-    --panel-border: rgba(255, 255, 255, 0.12);
 }
 
 * { box-sizing: border-box; }
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: 'Inter', sans-serif; }
 
-html, body {
-    margin: 0; padding: 0;
-    width: 100%; height: 100%;
-    overflow: hidden;
-    background: #000;
-    color: var(--text-color);
-    font-family: 'Inter', sans-serif;
-}
+/* BACKGROUND */
+#bg-wrap { position: fixed; inset: 0; z-index: 0; background: #000; }
+.bg-layer { position: absolute; top: -15%; left: -15%; width: 130%; height: 130%; background-size: cover; background-position: center; opacity: 0; transform: scale(1.1); filter: blur(50px) brightness(0.4); transition: opacity 1.2s, filter 1.5s; }
+.bg-layer.active { opacity: 1; animation: bgMainMove 30s infinite alternate linear; }
+body:not(.immersive) .bg-layer { animation-play-state: paused; }
+body.immersive .bg-layer.active { filter: blur(0px) brightness(0.4) grayscale(1); transition: filter 3s ease-in-out; }
 
-/* --- BACKGROUND SYSTEM --- */
-#bg-wrap {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    background: #000;
-}
+/* SPOTLIGHTS */
+.spotlight-container { position: absolute; inset: 0; z-index: 1; opacity: 0; transition: opacity 3s; mix-blend-mode: color; }
+body.immersive .spotlight-container { opacity: 1; }
+.spotlight { position: absolute; width: 90vw; height: 90vw; border-radius: 50%; filter: blur(80px); opacity: 0.7; }
+.s1 { background: radial-gradient(circle, var(--spot-1), transparent 70%); top: -20%; left: -10%; animation: sweep1 22s infinite alternate ease-in-out; }
+.s2 { background: radial-gradient(circle, var(--spot-2), transparent 70%); bottom: -20%; right: -10%; animation: sweep2 28s infinite alternate ease-in-out; }
+.s3 { background: radial-gradient(circle, var(--spot-3), transparent 70%); top: 30%; left: 30%; animation: sweep3 20s infinite alternate ease-in-out; }
 
-.bg-layer {
-    position: absolute;
-    top: -15%; left: -15%;
-    width: 130%; height: 130%;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transform: scale(1.1);
-    filter: blur(50px) brightness(0.42) saturate(1.1);
-    /* Fast return to Details Mode */
-    transition: opacity 1.2s ease, filter 1.5s ease-out;
-    will-change: opacity, filter;
-}
+/* VIZ 1: KINETIC SCROLL */
+.viz-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 50vh; display: flex; flex-direction: column; opacity: 0; transition: opacity 2s; z-index: 10; overflow: hidden; }
+/* Display Viz 1 only when in immersive mode and activeViz is 1 */
+body.immersive.active-viz-1 .viz-container#viz-1 { opacity: 1; }
 
-.bg-layer.active {
-    opacity: 1;
-    animation: bgMainMove 30s ease-in-out infinite alternate;
-}
+.marquee-wrapper { width: 100%; overflow: hidden; white-space: nowrap; display: flex; }
+.song-line { height: 25vh; font-weight: 300; font-size: 20vh; line-height: 25vh; text-transform: uppercase; }
+.song-line .marquee-content { animation: scrollLeft 25s linear infinite; }
+.artist-line { height: 12.5vh; margin-top: 3px; font-weight: 900; font-size: 11vh; line-height: 12.5vh; text-transform: uppercase; }
+.artist-line .marquee-content { animation: scrollLeft 15s linear infinite; }
+.album-line { height: 8vh; margin-top: 3px; font-weight: 500; font-size: 7vh; line-height: 8vh; text-transform: uppercase; opacity: 0.7; }
+.album-line .marquee-content { animation: scrollLeft 35s linear infinite; }
 
-/* Freeze movement in Details Mode */
-body:not(.immersive) .bg-layer {
-    animation-play-state: paused;
-}
+@keyframes scrollLeft { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-content { display: inline-block; padding-right: 100px; }
 
-body.immersive .bg-layer.active {
-    /* Immersive: Clear the blur so we see the image details, but darkened */
-    filter: blur(0px) brightness(0.4) grayscale(1);
-    transition: filter 3.0s ease-in-out;
-}
+/* DETAILS MODE UI */
+.zune-layout { display: flex; align-items: center; gap: 30px; height: 100vh; padding: 0 8vw; position: relative; z-index: 5; }
+#track-img { width: min(34vw, 450px); height: min(34vw, 450px); border: 6px solid #fff; transition: all 0.7s; }
+.text-meta { transition: all 0.6s; }
+#track-title { font-size: clamp(3rem, 7vw, 6rem); margin: 0; text-transform: uppercase; font-weight: 900; }
+#track-artist { font-size: clamp(1.5rem, 4vw, 3rem); margin: 0; text-transform: uppercase; opacity: 0.8; }
 
-/* --- SPOTLIGHT SYSTEM --- */
-.spotlight-container {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 3s ease-in-out;
-    /* Paints color onto the grayscale background underneath */
-    mix-blend-mode: color; 
-}
+body.immersive #track-img, body.immersive .text-meta { opacity: 0; transform: scale(0.9); }
 
-body.immersive .spotlight-container {
-    opacity: 1;
-}
-
-.spotlight {
-    position: absolute;
-    width: 90vw;
-    height: 90vw;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.7;
-}
-
-.s1 {
-    background: radial-gradient(circle, var(--spot-1) 0%, transparent 70%);
-    top: -20%; left: -10%;
-    animation: sweep1 22s infinite alternate ease-in-out;
-}
-
-.s2 {
-    background: radial-gradient(circle, var(--spot-2) 0%, transparent 70%);
-    bottom: -20%; right: -10%;
-    animation: sweep2 28s infinite alternate ease-in-out;
-}
-
-.s3 {
-    background: radial-gradient(circle, var(--spot-3) 0%, transparent 70%);
-    top: 30%; left: 30%;
-    animation: sweep3 20s infinite alternate ease-in-out;
-}
-
-@keyframes sweep1 {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(50vw, 30vh) scale(1.3); }
-}
-@keyframes sweep2 {
-    0% { transform: translate(0, 0) scale(1.2); }
-    100% { transform: translate(-40vw, -40vh) scale(0.9); }
-}
-@keyframes sweep3 {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(-20vw, 20vh) scale(1.4); }
-}
-
-/* --- PLAYER UI (DETAILS MODE) --- */
-#player-screen {
-    width: 100%; height: 100%;
-    position: relative;
-    z-index: 2;
-}
-
-.zune-layout {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 22px;
-    width: 100%; height: 100vh;
-    padding: 8vh 8vw;
-}
-
-#track-img {
-    width: min(34vw, 450px);
-    height: min(34vw, 450px);
-    object-fit: cover;
-    border: 6px solid var(--border-color); /* Thinner 6px border */
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
-    transform: scale(1);
-    opacity: 1;
-    filter: grayscale(0) contrast(1);
-    /* Fast wakeup */
-    transition: 
-        opacity 0.6s ease, 
-        transform 0.7s cubic-bezier(0.2, 0.75, 0.2, 1), 
-        filter 0.6s ease;
-    will-change: opacity, transform, filter;
-}
-
-.text-meta {
-    max-width: 60vw;
-    color: #fff;
-    text-shadow: 0 6px 30px rgba(0, 0, 0, 0.45);
-    transition: opacity 0.5s ease, transform 0.6s ease;
-}
-
-#track-title {
-    margin: 0; font-size: clamp(3rem, 7vw, 6.2rem);
-    font-weight: 900; line-height: 0.92; text-transform: uppercase;
-}
-
-#track-artist {
-    margin: 10px 0 0 0; font-size: clamp(1.6rem, 4vw, 4rem);
-    font-weight: 700; text-transform: uppercase; opacity: 0.95;
-}
-
-/* --- IMMERSIVE MODE CHANGES --- */
-body.immersive #track-img {
-    opacity: 0;
-    transform: scale(0.9);
-    filter: grayscale(1) blur(10px);
-    /* Slow 2s fade out */
-    transition: opacity 2.0s ease, transform 2.0s ease, filter 2.0s ease;
-}
-
-body.immersive .text-meta {
-    opacity: 0;
-    transform: translate3d(20px, 0, 0);
-    /* Slow fade out for text */
-    transition: opacity 1.5s ease, transform 1.5s ease;
-}
-
-/* Wake up delays for Details Mode */
-body:not(.immersive) #track-img { transition-delay: 0.1s; }
-body:not(.immersive) .text-meta { transition-delay: 0.2s; }
-
-/* Unified Background Animation */
-@keyframes bgMainMove {
-    0% { transform: scale(1.1) translate3d(0, 0, 0); }
-    100% { transform: scale(1.18) translate3d(-2%, -2%, 0); }
-}
-
-/* Login Screen Styles */
-.glass-container {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    min-width: min(90vw, 420px);
-    text-align: center; padding: 36px 32px;
-    background: var(--panel-bg); backdrop-filter: blur(18px);
-}
-
-@media (max-width: 900px) {
-    .zune-layout { flex-direction: column; padding: 7vh 7vw; }
-    #track-img { width: min(78vw, 380px); height: min(78vw, 380px); }
-    .text-meta { max-width: 86vw; }
-}
+/* ANIMATIONS */
+@keyframes bgMainMove { from { transform: scale(1.1) translate(0,0); } to { transform: scale(1.2) translate(-2%, -2%); } }
+@keyframes sweep1 { from { transform: translate(0,0); } to { transform: translate(40vw, 20vh); } }
+@keyframes sweep2 { from { transform: translate(0,0); } to { transform: translate(-30vw, -30vh); } }
+@keyframes sweep3 { from { transform: translate(0,0); } to { transform: translate(10vw, -10vh); } }
