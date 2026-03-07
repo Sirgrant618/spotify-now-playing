@@ -205,7 +205,7 @@ function startImmersiveSequence() {
         current.classList.remove('fade-in');
 
         // 2. Wait 5s for the fade-out to finish
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 5500));
         
         // 3. Swap Displays
         current.style.display = 'none';
@@ -224,7 +224,7 @@ function startImmersiveSequence() {
         showingFirst = !showingFirst;
         
         // Set the next swap (total cycle remains 30s)
-        immersiveSequenceTimeout = setTimeout(switchVisual, 25000); 
+        immersiveSequenceTimeout = setTimeout(switchVisual, 35000); 
     }
 
     // Initial Start
@@ -232,7 +232,7 @@ function startImmersiveSequence() {
     setTimeout(() => ov1.classList.add('fade-in'), 50);
     ov2.style.display = 'none';
 
-    immersiveSequenceTimeout = setTimeout(switchVisual, 25000);
+    immersiveSequenceTimeout = setTimeout(switchVisual, 35000);
 }
 
 function generateWordCloud() {
