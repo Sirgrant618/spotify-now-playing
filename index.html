@@ -21,24 +21,24 @@
         <div class="bg-noise"></div>
     </div>
 
+    <div id="immersive-marquee" class="immersive-overlay">
+        <div class="marquee-wrapper">
+            <div class="marquee-line song-line" id="m-song"></div>
+            <div class="marquee-line artist-line" id="m-artist"></div>
+            <div class="marquee-line album-line" id="m-album"></div>
+        </div>
+    </div>
+
+    <div id="immersive-fill" class="immersive-overlay">
+        <div id="fill-container"></div>
+    </div>
+
     <div id="login-screen" class="glass-container">
         <h1 class="zune-text">ZUNE // CONNECT</h1>
         <button id="login-button" onclick="redirectToSpotify()">START</button>
     </div>
 
     <div id="player-screen" style="display: none;">
-        <div id="immersive-overlay-1" class="immersive-content">
-            <div class="marquee-group">
-                <div id="imm-track-1" class="imm-text song-title"></div>
-                <div id="imm-artist-1" class="imm-text artist-name"></div>
-                <div id="imm-album-1" class="imm-text album-title"></div>
-            </div>
-        </div>
-
-        <div id="immersive-overlay-2" class="immersive-content">
-            <div id="word-cloud-container"></div>
-        </div>
-
         <div class="zune-layout">
             <div class="art-section">
                 <img id="track-img" src="" alt="Album Art" />
