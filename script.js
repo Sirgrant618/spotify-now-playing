@@ -222,26 +222,23 @@ function startImmersiveSequence() {
         if (immersiveStep % 3 === 1) generateWordCloud();
         
         if (immersiveStep % 3 === 2) {
-            // 1. Reset text and hide to prevent ghosting
+            // Clear old state
             dTrack.style.opacity = '0';
             dArtist.style.opacity = '0';
             dAlbum.style.opacity = '0';
-            
-            // 2. Clear old classes and force reflow
-            dTrack.className = 'drift-text'; 
-            dArtist.className = 'drift-text'; 
-            dAlbum.className = 'drift-text';
+    
+            // Force reflow
             void dTrack.offsetWidth; 
 
-            // 3. Re-apply classes. The CSS handles the opacity fade-in during the animation.
+            // Re-apply the specific child animations
+            dTrack.className = 'drift-text drift-rtl'; 
+            dArtist.className = 'drift-text drift-ltr'; 
+            dAlbum.className = 'drift-text drift-rtl';
+
+            // Stagger the entrance slightly
             dTrack.style.animationDelay = '0s';
-            dTrack.classList.add('drift-rtl');
-
-            dArtist.style.animationDelay = '0.7s'; // Slightly staggered
-            dArtist.classList.add('drift-ltr');
-
-            dAlbum.style.animationDelay = '1.4s';
-            dAlbum.classList.add('drift-rtl');
+            dArtist.style.animationDelay = '0.5s';
+            dAlbum.style.animationDelay = '1s';
         }
 
         setTimeout(() => next.classList.add('fade-in'), 50);

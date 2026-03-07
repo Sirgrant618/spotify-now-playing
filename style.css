@@ -209,10 +209,30 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 .stacked-drift-container {
     display: flex;
     flex-direction: column;
-    gap: 1vh;
+    gap: 2vh;
     transform: rotate(-30deg); 
 }
 
+/* --- THE PARENT: Constant Slow Transversal Drift --- */
+.drift-row {
+    width: 100%;
+    will-change: transform;
+}
+
+/* Rows 1 and 3 drift one way, Row 2 drifts the other */
+.row-1, .row-3 { animation: slowDriftLTR 40s linear infinite; }
+.row-2 { animation: slowDriftRTL 40s linear infinite; }
+
+@keyframes slowDriftLTR {
+    from { transform: translateX(-8vw); }
+    to { transform: translateX(8vw); }
+}
+@keyframes slowDriftRTL {
+    from { transform: translateX(8vw); }
+    to { transform: translateX(-8vw); }
+}
+
+/* --- THE CHILD: The "Enter-Pause-Exit" Logic --- */
 .drift-text {
     font-size: 16vw;
     font-weight: 900;
@@ -224,75 +244,21 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     will-change: transform, opacity;
 }
 
-.drift-rtl {
-    animation: driftRightToLeft 25s forwards;
+.drift-rtl { animation: moveRTL 25s forwards; }
+.drift-ltr { animation: moveLTR 25s forwards; }
+
+@keyframes moveRTL {
+    0% { transform: translateX(130vw); opacity: 0; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    15% { transform: translateX(0); opacity: 1; } 
+    85% { transform: translateX(0); opacity: 1; animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0); }
+    100% { transform: translateX(-150vw); opacity: 0; }
 }
 
-.drift-ltr {
-    animation: driftLeftToRight 25s forwards;
-}
-
-/* --- UPDATED STACKED DRIFT ANIMATIONS --- */
-
-/* --- UPDATED STACKED DRIFT ANIMATIONS --- */
-
-@keyframes driftRightToLeft {
-    0% {
-        transform: translateX(150vw);
-        opacity: 0;
-        /* Rapid entrance */
-        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    10% {
-        opacity: 1;
-    }
-
-    /* 20% to 80% is the "Coast Zone" */
-    20% {
-        transform: translateX(30vw);
-        animation-timing-function: linear; /* Constant slow drift through the center */
-    }
-
-    80% {
-        transform: translateX(-30vw);
-        opacity: 1;
-        /* Smooth acceleration exit */
-        animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0);
-    }
-
-    100% {
-        transform: translateX(-190vw);
-        opacity: 0;
-    }
-}
-
-@keyframes driftLeftToRight {
-    0% {
-        transform: translateX(-150vw);
-        opacity: 0;
-        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    10% {
-        opacity: 1;
-    }
-
-    20% {
-        transform: translateX(-30vw);
-        animation-timing-function: linear;
-    }
-
-    80% {
-        transform: translateX(30vw);
-        opacity: 1;
-        animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0);
-    }
-
-    100% {
-        transform: translateX(190vw);
-        opacity: 0;
-    }
+@keyframes moveLTR {
+    0% { transform: translateX(-130vw); opacity: 0; animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+    15% { transform: translateX(0); opacity: 1; } 
+    85% { transform: translateX(0); opacity: 1; animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0); }
+    100% { transform: translateX(150vw); opacity: 0; }
 }
 
 /* Auth Screens */
