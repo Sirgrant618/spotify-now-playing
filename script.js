@@ -154,22 +154,36 @@ function exitImmersiveMode() {
 function startImmersiveSequence() {
     const ov1 = document.getElementById('immersive-overlay-1');
     const ov2 = document.getElementById('immersive-overlay-2');
+
     const track = document.getElementById('track-title').textContent;
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
-    
+
     document.getElementById('imm-track-1').textContent = (track + ' ').repeat(20);
     document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(20);
     document.getElementById('imm-album-1').textContent = (album + ' ').repeat(20);
 
+    let showingFirst = true;
+
+    function switchVisual() {
+        if (showingFirst) {
+            ov1.style.display = 'none';
+            ov2.style.display = 'block';
+            generateWordCloud();
+        } else {
+            ov2.style.display = 'none';
+            ov1.style.display = 'block';
+        }
+
+        showingFirst = !showingFirst;
+
+        immersiveSequenceTimeout = setTimeout(switchVisual, 30000);
+    }
+
     ov1.style.display = 'block';
     ov2.style.display = 'none';
 
-    immersiveSequenceTimeout = setTimeout(() => {
-        ov1.style.display = 'none';
-        ov2.style.display = 'block';
-        generateWordCloud();
-    }, 30000);
+    immersiveSequenceTimeout = setTimeout(switchVisual, 30000);
 }
 
 function generateWordCloud() {
