@@ -19,7 +19,7 @@ async function redirectToSpotify() {
         response_type: 'code', client_id: clientId, scope,
         code_challenge_method: 'S256', code_challenge: challenge, redirect_uri: redirectUri
     });
-    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    window.location.href = `https://accounts.spotify.com/authorize?$${params.toString()}`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -28,13 +28,27 @@ setupActivityWatchers();
 bootstrapAuth();
 
 async function bootstrapAuth() {
-    if (code) { await handleCallback(code); return; }
+    if (code) { 
+        await handleCallback(code); 
+        // Remove the code from the URL so a refresh doesn't trigger handleCallback again
+        window.history.replaceState({}, document.title, redirectUri);
+        return; 
+    }
+
     const accessToken = localStorage.getItem('access_token');
     const refreshToken = localStorage.getItem('refresh_token');
-    if (accessToken) { showPlayer(); startPolling(accessToken); resetInactivityTimer(); return; }
-    if (refreshToken) {
-        const newAccessToken = await refreshAccessToken();
-        if (newAccessToken) { showPlayer(); startPolling(newAccessToken); resetInactivityTimer(); }
+
+    if (accessToken) {
+        showPlayer();
+        startPolling(accessToken);
+        resetInactivityTimer();
+    } else if (refreshToken) {
+        // If we don't have an access token but HAVE a refresh token, use it!
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+            showPlayer();
+            startPolling(newToken);
+        }
     }
 }
 
@@ -59,22 +73,6 @@ async function handleCallback(code) {
     } catch (err) { console.error(err); }
 }
 
-async function refreshAccessToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return null;
-    try {
-        const response = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ client_id: clientId, grant_type: 'refresh_token', refresh_token: refreshToken })
-        });
-        const data = await response.json();
-        if (!response.ok || !data.access_token) return null;
-        localStorage.setItem('access_token', data.access_token);
-        return data.access_token;
-    } catch (err) { return null; }
-}
-
 /* --- ARTIST IMAGE FETCH --- */
 async function getArtistImage(token, artistId) {
     try {
@@ -88,8 +86,15 @@ async function getArtistImage(token, artistId) {
 
 /* --- POLLING & UI --- */
 function startPolling(token) {
+    // Clear any existing interval before starting a new one
+    if (pollInterval) clearInterval(pollInterval); 
+    
     updateNowPlaying(token);
-    pollInterval = setInterval(() => updateNowPlaying(localStorage.getItem('access_token')), 5000);
+    pollInterval = setInterval(() => {
+        // Always get the latest token from storage in case it was refreshed
+        const currentToken = localStorage.getItem('access_token');
+        updateNowPlaying(currentToken);
+    }, 5000);
 }
 
 async function updateNowPlaying(token) {
@@ -97,7 +102,22 @@ async function updateNowPlaying(token) {
         const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             headers: { Authorization: `Bearer ${token}` }
         });
+
+        // --- NEW REFRESH LOGIC ---
+        if (res.status === 401) {
+            console.log("Token expired, refreshing...");
+            const newToken = await refreshAccessToken();
+            if (newToken) {
+                // Stop the old interval and start a new one with the fresh token
+                clearInterval(pollInterval);
+                startPolling(newToken);
+            }
+            return; 
+        }
+        // --- END REFRESH LOGIC ---
+
         if (res.status === 204 || !res.ok) return;
+        
         const data = await res.json();
         if (!data.item) return;
 
@@ -269,4 +289,35 @@ async function generateCodeChallenge(verifier) {
     const data = new TextEncoder().encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
     return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+async function refreshAccessToken() {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) return redirectToSpotify();
+
+    const url = "https://accounts.spotify.com/api/token";
+    const payload = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken,
+            client_id: clientId
+        }),
+    };
+
+    const response = await fetch(url, payload);
+    const data = await response.json();
+
+    if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+        // If they sent a new refresh token, swap the old one out
+        if (data.refresh_token) {
+            localStorage.setItem('refresh_token', data.refresh_token);
+        }
+        return data.access_token;
+    } else {
+        // If the refresh token itself is expired/revoked, force a login
+        redirectToSpotify();
+    }
 }
