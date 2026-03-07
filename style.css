@@ -21,6 +21,27 @@ html, body {
     font-family: 'Inter', sans-serif;
 }
 
+/* Adjust the landing page heading size/style if needed */
+.zune-text {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+    text-transform: none; /* Removes the forced uppercase from previous versions */
+}
+
+/* Style for your credit line */
+.credit-footer {
+    position: absolute;
+    bottom: -60px; /* Positions it below the glass container */
+    left: 0;
+    right: 0;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4); /* Subtle grey */
+    letter-spacing: 0.5px;
+    text-align: center;
+    font-weight: 300;
+}
 /* --- BACKGROUND SYSTEM --- */
 #bg-wrap {
     position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #000;
