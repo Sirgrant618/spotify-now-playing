@@ -227,27 +227,59 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
    but keeps a slight constant momentum.
 */
 .drift-rtl {
-    animation: driftRightToLeft 25s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+    animation: driftRightToLeft 25s forwards;
 }
 
 .drift-ltr {
-    animation: driftLeftToRight 25s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+    animation: driftLeftToRight 25s forwards;
 }
 
 @keyframes driftRightToLeft {
-    0% { transform: translateX(150vw); opacity: 0; }
-    5% { opacity: 1; } /* Fade in quickly as it enters */
-    10% { transform: translateX(20vw); } /* End of fast entrance */
-    90% { transform: translateX(-20vw); opacity: 1; } /* End of slow drift */
-    100% { transform: translateX(-180vw); opacity: 0; } /* Fast exit */
+    0% {
+        transform: translateX(150vw);
+        opacity: 0;
+        animation-timing-function: cubic-bezier(0.18, 0.85, 0.22, 1); /* fast in, decelerate */
+    }
+    6% {
+        opacity: 1;
+    }
+    18% {
+        transform: translateX(25vw);
+        animation-timing-function: linear; /* steady slow drift */
+    }
+    72% {
+        transform: translateX(-25vw);
+        opacity: 1;
+        animation-timing-function: cubic-bezier(0.7, 0, 1, 1); /* accelerate out */
+    }
+    100% {
+        transform: translateX(-190vw);
+        opacity: 0;
+    }
 }
 
 @keyframes driftLeftToRight {
-    0% { transform: translateX(-150vw); opacity: 0; }
-    5% { opacity: 1; }
-    10% { transform: translateX(-20vw); }
-    90% { transform: translateX(20vw); opacity: 1; }
-    100% { transform: translateX(180vw); opacity: 0; }
+    0% {
+        transform: translateX(-150vw);
+        opacity: 0;
+        animation-timing-function: cubic-bezier(0.18, 0.85, 0.22, 1);
+    }
+    6% {
+        opacity: 1;
+    }
+    18% {
+        transform: translateX(-25vw);
+        animation-timing-function: linear;
+    }
+    72% {
+        transform: translateX(25vw);
+        opacity: 1;
+        animation-timing-function: cubic-bezier(0.7, 0, 1, 1);
+    }
+    100% {
+        transform: translateX(190vw);
+        opacity: 0;
+    }
 }
 
 /* Auth Screens */
