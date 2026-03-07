@@ -8,6 +8,7 @@ let currentAlbumName = "";
 let activeBgId = 'bg-a';
 let inactivityTimer = null;
 let immersiveSequenceTimeout = null;
+let lastImmersiveIndex = -1; // Track the previous visual
 const IDLE_DELAY_MS = 5000;
 
 /* --- AUTH --- */
@@ -181,7 +182,7 @@ function exitImmersiveMode() {
     });
 }
 
-let immersiveStep = 0; // Global or scoped inside startImmersiveSequence
+//let immersiveStep = 0; // Global or scoped inside startImmersiveSequence
 
 function startImmersiveSequence() {
     const overlays = [
@@ -190,67 +191,56 @@ function startImmersiveSequence() {
         document.getElementById('immersive-overlay-3')
     ];
 
-    const track = document.getElementById('track-title').textContent;
-    const artist = document.getElementById('track-artist').textContent;
-    const album = currentAlbumName.toUpperCase();
+    // 1. Hide all overlays first
+    overlays.forEach(el => el.style.display = 'none');
 
-    // Prep Overlay 1 (Marquee)
-    document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
-    document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
-    document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
+    // 2. Pick a new random index that is NOT the same as lastImmersiveIndex
+    let nextIndex;
+    do {
+        nextIndex = Math.floor(Math.random() * overlays.length);
+    } while (nextIndex === lastImmersiveIndex);
 
-    // Prep Overlay 3 (Stacked Drift)
-    const dTrack = document.getElementById('drift-track');
-    const dArtist = document.getElementById('drift-artist');
-    const dAlbum = document.getElementById('drift-album');
-    
-    dTrack.textContent = track;
-    dArtist.textContent = artist;
-    dAlbum.textContent = album;
+    lastImmersiveIndex = nextIndex; // Update the tracker
+    const activeOverlay = overlays[nextIndex];
+    activeOverlay.style.display = 'flex';
 
-    async function switchVisual() {
-        const current = overlays[immersiveStep % 3];
-        immersiveStep++;
-        const next = overlays[immersiveStep % 3];
+    // 3. Trigger specific logic based on the chosen visual
+    if (nextIndex === 0) {
+        // Overlay 1: Marquee Logic
+        updateMarqueeText();
+    } else if (nextIndex === 1) {
+        // Overlay 2: Word Cloud Logic
+        generateWordCloud();
+    } else if (nextIndex === 2) {
+        // Overlay 3: Stacked Drift Logic
+        const dTrack = document.getElementById('drift-track');
+        const dArtist = document.getElementById('drift-artist');
+        const dAlbum = document.getElementById('drift-album');
 
-        current.classList.remove('fade-in');
-        await new Promise(r => setTimeout(r, 5500));
+        // Update Text
+        dTrack.innerText = currentTrackTitle;
+        dArtist.innerText = currentArtistName;
+        dAlbum.innerText = currentAlbumName;
+
+        // Reset and trigger animations
+        [dTrack, dArtist, dAlbum].forEach(el => {
+            el.className = 'drift-text'; // Strip classes
+            void el.offsetWidth;         // Trigger reflow
+        });
+
+        dTrack.classList.add('drift-rtl');
+        dArtist.classList.add('drift-ltr');
+        dAlbum.classList.add('drift-rtl');
         
-        current.style.display = 'none';
-        next.style.display = (immersiveStep % 3 === 2) ? 'flex' : 'block';
-
-        if (immersiveStep % 3 === 1) generateWordCloud();
-        
-        if (immersiveStep % 3 === 2) {
-            // Clear old state
-            dTrack.style.opacity = '0';
-            dArtist.style.opacity = '0';
-            dAlbum.style.opacity = '0';
-    
-            // Force reflow
-            void dTrack.offsetWidth; 
-
-            // Re-apply the specific child animations
-            dTrack.className = 'drift-text drift-rtl'; 
-            dArtist.className = 'drift-text drift-ltr'; 
-            dAlbum.className = 'drift-text drift-rtl';
-
-            // Stagger the entrance slightly
-            dTrack.style.animationDelay = '0s';
-            dArtist.style.animationDelay = '0.5s';
-            dAlbum.style.animationDelay = '1s';
-        }
-
-        setTimeout(() => next.classList.add('fade-in'), 50);
-        immersiveSequenceTimeout = setTimeout(switchVisual, 35000);
+        // Apply your staggered delays
+        dTrack.style.animationDelay = '0s';
+        dArtist.style.animationDelay = '0.5s';
+        dAlbum.style.animationDelay = '1s';
     }
 
-    // Initial Start
-    overlays.forEach(o => o.style.display = 'none');
-    overlays[0].style.display = 'block';
-    setTimeout(() => overlays[0].classList.add('fade-in'), 50);
-    immersiveStep = 0;
-    immersiveSequenceTimeout = setTimeout(switchVisual, 35000);
+    // 4. Set timer for the next switch (e.g., 25 seconds)
+    if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
+    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 25000);
 }
 
 function generateWordCloud() {
