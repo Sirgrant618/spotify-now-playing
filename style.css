@@ -210,7 +210,7 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     display: flex;
     flex-direction: column;
     gap: 1vh;
-    transform: rotate(-30deg); 
+    transform: rotate(-30deg);
 }
 
 .drift-text {
@@ -220,12 +220,10 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     white-space: nowrap;
     line-height: 0.9;
     letter-spacing: -5px;
-    opacity: 0; /* Hidden by default to prevent "popping" */
+    opacity: 0;
+    will-change: transform, opacity;
 }
 
-/* Cubic-bezier(0.1, 0.7, 0.3, 1) provides a fast entrance 
-   but keeps a slight constant momentum.
-*/
 .drift-rtl {
     animation: driftRightToLeft 25s forwards;
 }
@@ -238,20 +236,33 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     0% {
         transform: translateX(150vw);
         opacity: 0;
-        animation-timing-function: cubic-bezier(0.18, 0.85, 0.22, 1); /* fast in, decelerate */
+        animation-timing-function: cubic-bezier(0.16, 0.9, 0.3, 1);
     }
-    6% {
+
+    5% {
         opacity: 1;
     }
-    18% {
-        transform: translateX(25vw);
-        animation-timing-function: linear; /* steady slow drift */
+
+    /* Fast entrance */
+    12% {
+        transform: translateX(40vw);
+        animation-timing-function: cubic-bezier(0.25, 0.75, 0.4, 1);
     }
+
+    /* Handoff zone: still moving, just slower */
+    24% {
+        transform: translateX(18vw);
+        animation-timing-function: linear;
+    }
+
+    /* Slow stacked drift */
     72% {
-        transform: translateX(-25vw);
+        transform: translateX(-22vw);
         opacity: 1;
-        animation-timing-function: cubic-bezier(0.7, 0, 1, 1); /* accelerate out */
+        animation-timing-function: cubic-bezier(0.7, 0, 1, 1);
     }
+
+    /* Accelerate out */
     100% {
         transform: translateX(-190vw);
         opacity: 0;
@@ -262,20 +273,33 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     0% {
         transform: translateX(-150vw);
         opacity: 0;
-        animation-timing-function: cubic-bezier(0.18, 0.85, 0.22, 1);
+        animation-timing-function: cubic-bezier(0.16, 0.9, 0.3, 1);
     }
-    6% {
+
+    5% {
         opacity: 1;
     }
-    18% {
-        transform: translateX(-25vw);
+
+    /* Fast entrance */
+    12% {
+        transform: translateX(-40vw);
+        animation-timing-function: cubic-bezier(0.25, 0.75, 0.4, 1);
+    }
+
+    /* Handoff zone: still moving, just slower */
+    24% {
+        transform: translateX(-18vw);
         animation-timing-function: linear;
     }
+
+    /* Slow stacked drift */
     72% {
-        transform: translateX(25vw);
+        transform: translateX(22vw);
         opacity: 1;
         animation-timing-function: cubic-bezier(0.7, 0, 1, 1);
     }
+
+    /* Accelerate out */
     100% {
         transform: translateX(190vw);
         opacity: 0;
