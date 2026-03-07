@@ -37,14 +37,28 @@ html, body {
 
 .bg-layer.active { 
     opacity: 1; 
-    animation: bgMainMove 40s ease-in-out infinite alternate; 
+    animation: bgMainMove 60s ease-in-out infinite alternate; 
 }
 
 body.immersive .bg-layer.active {
     filter: blur(0px) brightness(0.25) saturate(0.8) grayscale(0.3);
 }
 
-@keyframes bgMainMove { 0% { transform: scale(1.05); } 100% { transform: scale(1.15) translate(-1%, -1%); } }
+/* --- UPDATED KEN BURNS ANIMATION --- */
+@keyframes bgMainMove {
+    0% {
+        transform: scale(1.05) translate(0, 0);
+    }
+    33% {
+        transform: scale(1.15) translate(-2%, 1%);
+    }
+    66% {
+        transform: scale(1.1) translate(1%, -2%);
+    }
+    100% {
+        transform: scale(1.2) translate(-1%, -1%);
+    }
+}
 
 /* --- SPOTLIGHTS --- */
 .spotlight-container {
