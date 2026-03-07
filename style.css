@@ -210,40 +210,44 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     display: flex;
     flex-direction: column;
     gap: 1vh;
-    transform: rotate(-30deg); /* Cants the entire block */
+    transform: rotate(-30deg); 
 }
 
 .drift-text {
-    font-size: 14vw; /* Slightly smaller to ensure 3 lines fit well */
+    font-size: 16vw;
     font-weight: 900;
     text-transform: uppercase;
     white-space: nowrap;
     line-height: 0.9;
     letter-spacing: -5px;
+    opacity: 0; /* Hidden by default to prevent "popping" */
 }
 
-/* Right to Left Animation (Track & Album) */
+/* Cubic-bezier(0.1, 0.7, 0.3, 1) provides a fast entrance 
+   but keeps a slight constant momentum.
+*/
 .drift-rtl {
-    animation: driftRightToLeft 25s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+    animation: driftRightToLeft 25s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
 }
 
-/* Left to Right Animation (Artist) */
 .drift-ltr {
-    animation: driftLeftToRight 25s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+    animation: driftLeftToRight 25s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
 }
 
 @keyframes driftRightToLeft {
-    0% { transform: translateX(120vw); opacity: 0; }
-    10% { transform: translateX(10vw); opacity: 1; }  /* Decelerate into view */
-    90% { transform: translateX(-10vw); opacity: 1; } /* Slow drift for 20s */
-    100% { transform: translateX(-150vw); opacity: 0; } /* Accelerate out */
+    0% { transform: translateX(150vw); opacity: 0; }
+    5% { opacity: 1; } /* Fade in quickly as it enters */
+    10% { transform: translateX(20vw); } /* End of fast entrance */
+    90% { transform: translateX(-20vw); opacity: 1; } /* End of slow drift */
+    100% { transform: translateX(-180vw); opacity: 0; } /* Fast exit */
 }
 
 @keyframes driftLeftToRight {
-    0% { transform: translateX(-120vw); opacity: 0; }
-    10% { transform: translateX(-10vw); opacity: 1; }
-    90% { transform: translateX(10vw); opacity: 1; }
-    100% { transform: translateX(150vw); opacity: 0; }
+    0% { transform: translateX(-150vw); opacity: 0; }
+    5% { opacity: 1; }
+    10% { transform: translateX(-20vw); }
+    90% { transform: translateX(20vw); opacity: 1; }
+    100% { transform: translateX(180vw); opacity: 0; }
 }
 
 /* Auth Screens */
