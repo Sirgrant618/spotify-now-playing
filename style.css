@@ -27,14 +27,21 @@ html, body {
 }
 
 .bg-layer {
-    position: absolute; top: -5%; left: -5%; width: 110%; height: 110%;
-    background-size: cover; background-position: center 20%; background-repeat: no-repeat;
-    opacity: 0; transform: scale(1.05);
+    position: absolute; 
+    top: -5%; 
+    left: -5%; 
+    width: 110%; 
+    height: 110%;
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat;
+    opacity: 0; 
+    transform: scale(1.05);
     filter: blur(40px) brightness(0.4) saturate(1.1);
     transition: opacity 2.5s ease, filter 2.5s ease-in-out;
-    will-change: opacity, filter;
+    /* Added transform here for hardware acceleration */
+    will-change: opacity, filter, transform; 
 }
-
 .bg-layer.active { 
     opacity: 1; 
     animation: bgMainMove 60s ease-in-out infinite alternate; 
