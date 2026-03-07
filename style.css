@@ -40,9 +40,10 @@ html, body {
     background-repeat: no-repeat;
     opacity: 0;
     transform: scale(1.1);
-    filter: blur(50px) brightness(0.42) saturate(1.1);
-    /* Fast return to Details Mode */
-    transition: opacity 1.2s ease, filter 1.5s ease-out;
+    /* Details Mode: Blurred, saturated, and colored */
+    filter: blur(50px) brightness(0.42) saturate(1.2) grayscale(0);
+    /* Unified transition for smooth interpolation */
+    transition: opacity 2s ease, filter 2.5s ease-in-out;
     will-change: opacity, filter;
 }
 
@@ -51,15 +52,14 @@ html, body {
     animation: bgMainMove 30s ease-in-out infinite alternate;
 }
 
-/* Freeze movement in Details Mode */
+/* Freeze movement in Details Mode if desired, or keep it subtle */
 body:not(.immersive) .bg-layer {
-    animation-play-state: paused;
+    animation-play-state: running;
 }
 
 body.immersive .bg-layer.active {
-    /* Immersive: Clear the blur so we see the image details, but darkened */
-    filter: blur(0px) brightness(0.4) grayscale(1);
-    transition: filter 3.0s ease-in-out;
+    /* Immersive: Sharp, grayscale, and slightly darker */
+    filter: blur(0px) brightness(0.35) saturate(1) grayscale(1);
 }
 
 /* --- SPOTLIGHT SYSTEM --- */
@@ -138,16 +138,16 @@ body.immersive .spotlight-container {
     width: min(34vw, 450px);
     height: min(34vw, 450px);
     object-fit: cover;
-    border: 6px solid var(--border-color); /* Thinner 6px border */
+    border: 6px solid var(--border-color);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
     transform: scale(1);
     opacity: 1;
-    filter: grayscale(0) contrast(1);
-    /* Fast wakeup */
+    filter: grayscale(0) blur(0px);
+    /* Quick return to visibility */
     transition: 
-        opacity 0.6s ease, 
-        transform 0.7s cubic-bezier(0.2, 0.75, 0.2, 1), 
-        filter 0.6s ease;
+        opacity 0.8s ease, 
+        transform 0.8s cubic-bezier(0.2, 0.75, 0.2, 1), 
+        filter 0.8s ease;
     will-change: opacity, transform, filter;
 }
 
@@ -155,7 +155,7 @@ body.immersive .spotlight-container {
     max-width: 60vw;
     color: #fff;
     text-shadow: 0 6px 30px rgba(0, 0, 0, 0.45);
-    transition: opacity 0.5s ease, transform 0.6s ease;
+    transition: opacity 0.6s ease, transform 0.7s ease;
 }
 
 #track-title {
@@ -171,20 +171,19 @@ body.immersive .spotlight-container {
 /* --- IMMERSIVE MODE CHANGES --- */
 body.immersive #track-img {
     opacity: 0;
-    transform: scale(0.9);
-    filter: grayscale(1) blur(10px);
-    /* Slow 2s fade out */
-    transition: opacity 2.0s ease, transform 2.0s ease, filter 2.0s ease;
+    transform: scale(0.96);
+    filter: grayscale(1) blur(20px);
+    /* Slower fade out to allow background to sharpen behind it */
+    transition: opacity 2s ease, transform 2.5s ease, filter 2.5s ease;
 }
 
 body.immersive .text-meta {
     opacity: 0;
-    transform: translate3d(20px, 0, 0);
-    /* Slow fade out for text */
-    transition: opacity 1.5s ease, transform 1.5s ease;
+    transform: translate3d(30px, 0, 0);
+    transition: opacity 1.8s ease, transform 2s ease;
 }
 
-/* Wake up delays for Details Mode */
+/* Wake up delays to stagger the re-appearance of elements */
 body:not(.immersive) #track-img { transition-delay: 0.1s; }
 body:not(.immersive) .text-meta { transition-delay: 0.2s; }
 
