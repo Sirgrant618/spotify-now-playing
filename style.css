@@ -15,7 +15,11 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 #bg-wrap { position: fixed; inset: 0; z-index: 0; background: #000; }
 .bg-layer { position: absolute; top: -15%; left: -15%; width: 130%; height: 130%; background-size: cover; background-position: center; opacity: 0; transform: scale(1.1); filter: blur(50px) brightness(0.4); transition: opacity 1.2s, filter 1.5s; }
 .bg-layer.active { opacity: 1; animation: bgMainMove 30s infinite alternate linear; }
+
+/* Details Mode (Non-Immersive) */
 body:not(.immersive) .bg-layer { animation-play-state: paused; }
+
+/* Immersive Mode Background */
 body.immersive .bg-layer.active { filter: blur(0px) brightness(0.4) grayscale(1); transition: filter 3s ease-in-out; }
 
 /* SPOTLIGHTS */
@@ -27,8 +31,7 @@ body.immersive .spotlight-container { opacity: 1; }
 .s3 { background: radial-gradient(circle, var(--spot-3), transparent 70%); top: 30%; left: 30%; animation: sweep3 20s infinite alternate ease-in-out; }
 
 /* VIZ 1: KINETIC SCROLL */
-.viz-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 50vh; display: flex; flex-direction: column; opacity: 0; transition: opacity 2s; z-index: 10; overflow: hidden; }
-/* Display Viz 1 only when in immersive mode and activeViz is 1 */
+.viz-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 50vh; display: flex; flex-direction: column; opacity: 0; transition: opacity 2s; z-index: 10; overflow: hidden; pointer-events: none; }
 body.immersive.active-viz-1 .viz-container#viz-1 { opacity: 1; }
 
 .marquee-wrapper { width: 100%; overflow: hidden; white-space: nowrap; display: flex; }
@@ -42,14 +45,19 @@ body.immersive.active-viz-1 .viz-container#viz-1 { opacity: 1; }
 @keyframes scrollLeft { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .marquee-content { display: inline-block; padding-right: 100px; }
 
-/* DETAILS MODE UI */
-.zune-layout { display: flex; align-items: center; gap: 30px; height: 100vh; padding: 0 8vw; position: relative; z-index: 5; }
-#track-img { width: min(34vw, 450px); height: min(34vw, 450px); border: 6px solid #fff; transition: all 0.7s; }
-.text-meta { transition: all 0.6s; }
-#track-title { font-size: clamp(3rem, 7vw, 6rem); margin: 0; text-transform: uppercase; font-weight: 900; }
-#track-artist { font-size: clamp(1.5rem, 4vw, 3rem); margin: 0; text-transform: uppercase; opacity: 0.8; }
+/* PLAYER UI */
+#player-screen { position: relative; z-index: 5; width: 100%; height: 100%; }
+.zune-layout { display: flex; align-items: center; gap: 30px; height: 100vh; padding: 0 8vw; }
+#track-img { width: min(34vw, 450px); height: min(34vw, 450px); border: 6px solid #fff; transition: all 0.7s; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.text-meta { transition: all 0.6s; text-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+#track-title { font-size: clamp(2rem, 6vw, 5rem); margin: 0; text-transform: uppercase; font-weight: 900; line-height: 0.9; }
+#track-artist { font-size: clamp(1rem, 3vw, 2.5rem); margin: 5px 0 0 0; text-transform: uppercase; opacity: 0.8; }
 
-body.immersive #track-img, body.immersive .text-meta { opacity: 0; transform: scale(0.9); }
+body.immersive #track-img, body.immersive .text-meta { opacity: 0; transform: scale(0.9); pointer-events: none; }
+
+/* BG ELEMENTS */
+.bg-vignette { position: absolute; inset: 0; background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.7) 100%); z-index: 2; pointer-events: none; }
+.bg-noise { position: absolute; inset: 0; opacity: 0.03; background: url('https://grainy-gradients.vercel.app/noise.svg'); z-index: 3; pointer-events: none; }
 
 /* ANIMATIONS */
 @keyframes bgMainMove { from { transform: scale(1.1) translate(0,0); } to { transform: scale(1.2) translate(-2%, -2%); } }
