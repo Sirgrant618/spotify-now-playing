@@ -135,9 +135,9 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 .word-block-wrapper {
     display: flex;
     flex-direction: column;
-    width: 140%; /* Oversized for coverage */
+    width: 140%; 
     animation: moveUpwards 40s linear forwards;
-    opacity: 0.4; /* 60% transparent overall */
+    opacity: 0.6; 
 }
 
 .cloud-row {
@@ -149,13 +149,17 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     letter-spacing: 1px;
     margin-bottom: 5px;
     
-    /* Animation sequence: Fade in initially, then fade out line-by-line */
-    animation: 
-        fadeInRow 2s ease-out forwards,
-        fadeOutBottomUp 1.5s ease-in forwards;
-    
     /* Fade out starts at 24s. Rows at bottom (higher index) fade first */
-    animation-delay: 0s, calc(24s - (var(--row-index) * 0.15s));
+    /* Removed blur from this animation */
+    animation: fadeOutBottomUp 1.5s ease-in forwards;
+    animation-delay: calc(24s - (var(--row-index) * 0.15s));
+}
+
+.word-unit {
+    display: inline-block;
+    opacity: 0;
+    animation: fadeInWord 0.8s ease-out forwards;
+    animation-delay: var(--word-delay);
 }
 
 @keyframes moveUpwards {
@@ -163,14 +167,14 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     100% { transform: translateY(-50vh); }
 }
 
-@keyframes fadeInRow {
-    from { opacity: 0; transform: translateY(10px); }
+@keyframes fadeInWord {
+    from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeOutBottomUp {
-    from { opacity: 1; filter: blur(0); }
-    to { opacity: 0; filter: blur(15px); }
+    from { opacity: 1; }
+    to { opacity: 0; } /* Removed blur(15px) */
 }
 
 /* Auth Screens */
