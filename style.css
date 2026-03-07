@@ -55,10 +55,10 @@ body.immersive .bg-layer.active {
 
 .imm-text { white-space: nowrap; text-transform: uppercase; line-height: 1; }
 
-/* Speeds: Album (25s) and Artist (30s) are faster than Song (45s) */
-.song-title { font-size: 8vw; font-weight: 300; animation: slideIn 45s linear infinite; }
-.artist-name { font-size: 6vw; font-weight: 900; animation: slideIn 30s linear infinite; }
-.album-title { font-size: 4vw; font-weight: 500; animation: slideIn 25s linear infinite; }
+/* Track is slowest (20s), album is in between, artist is fastest */
+.song-title { font-size: 8vw; font-weight: 300; animation: slideIn 20s linear infinite; }
+.artist-name { font-size: 6vw; font-weight: 900; animation: slideIn 14s linear infinite; }
+.album-title { font-size: 4vw; font-weight: 500; animation: slideIn 17s linear infinite; }
 
 @keyframes slideIn {
     0% { transform: translateX(100%); opacity: 0; }
@@ -67,18 +67,40 @@ body.immersive .bg-layer.active {
     100% { transform: translateX(-150%); opacity: 0; }
 }
 
-/* Overlay 2: Word Cloud */
+/* Overlay 2: Oversized staggered text field */
 #word-cloud-container {
-    padding: 4vw; display: flex; flex-wrap: wrap; gap: 12px;
-    align-content: flex-start; animation: riseUp 30s linear forwards;
+    position: absolute;
+    top: -12vh;
+    left: -18vw;
+    width: 136vw;
+    height: 124vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.1vh;
+    animation: riseUp 30s linear forwards;
 }
 
-.cloud-word { font-size: 2.8vw; text-transform: uppercase; opacity: 0; font-weight: 700; animation: fadeInWord 0.4s ease forwards; }
+.cloud-line {
+    width: max-content;
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 3.2vw, 3.6rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    transform: translateX(var(--line-offset, 0));
+    animation: fadeInLine 0.6s ease forwards;
+}
 
-@keyframes fadeInWord { to { opacity: 1; } }
+@keyframes fadeInLine {
+    from { opacity: 0; }
+    to { opacity: 0.4; }
+}
+
 @keyframes riseUp {
-    from { transform: translateY(15%); }
-    to { transform: translateY(-40%); opacity: 0; }
+    from { transform: translate3d(0, 18vh, 0); }
+    to { transform: translate3d(-10vw, -34vh, 0); opacity: 0; }
 }
 
 /* --- REST OF UI --- */
