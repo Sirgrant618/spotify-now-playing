@@ -173,7 +173,7 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     /* Fade out starts at 24s. Rows at bottom (higher index) fade first */
     /* Removed blur from this animation */
     animation: fadeOutBottomUp 1.5s ease-in forwards;
-    animation-delay: calc(24s - (var(--row-index) * 0.15s));
+    animation-delay: calc(30s - (var(--row-index) * 0.15s));
 }
 
 .word-unit {
