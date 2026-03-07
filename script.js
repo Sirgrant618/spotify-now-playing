@@ -9,9 +9,8 @@ let activeBgId = 'bg-a';
 let inactivityTimer = null;
 let immersiveSequenceTimeout = null;
 const IDLE_DELAY_MS = 5000;
-const OVERLAY_1_MS = 30000;
-const OVERLAY_2_MS = 30000;
 
+/* --- AUTH --- */
 async function redirectToSpotify() {
     const verifier = generateRandomString(64);
     localStorage.setItem('code_verifier', verifier);
@@ -76,6 +75,7 @@ async function refreshAccessToken() {
     } catch (err) { return null; }
 }
 
+/* --- IMMERSIVE LOGIC --- */
 function setupActivityWatchers() {
     ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(e => {
         window.addEventListener(e, handleUserActivity, { passive: true });
@@ -106,59 +106,45 @@ function exitImmersiveMode() {
     document.getElementById('immersive-overlay-2').style.display = 'none';
 }
 
-function repeatText(text, count = 40) {
-    return Array(count).fill(text).join('   ');
-}
-
 function startImmersiveSequence() {
     const ov1 = document.getElementById('immersive-overlay-1');
     const ov2 = document.getElementById('immersive-overlay-2');
+    
+    // Set Text for Marquee
+    const track=document.getElementById('track-title').textContent;document.getElementById('imm-track-1').textContent=(track+' ').repeat(20);
+    const artist=document.getElementById('track-artist').textContent;document.getElementById('imm-artist-1').textContent=(artist+' ').repeat(20);
+    const album=currentAlbumName.toUpperCase();document.getElementById('imm-album-1').textContent=(album+' ').repeat(20);
 
-    const track = document.getElementById('track-title').textContent.trim();
-    const artist = document.getElementById('track-artist').textContent.trim();
-    const album = currentAlbumName.toUpperCase().trim();
+    // Show Overlay 1 (30s)
+    ov1.style.display = 'block';
+    ov2.style.display = 'none';
 
-    document.getElementById('imm-track-1').textContent = repeatText(track);
-    document.getElementById('imm-artist-1').textContent = repeatText(artist);
-    document.getElementById('imm-album-1').textContent = repeatText(album);
-
-    showOverlay1();
-
-    function showOverlay1() {
-        if (!document.body.classList.contains('immersive')) return;
-        ov1.style.display = 'block';
-        ov2.style.display = 'none';
-        immersiveSequenceTimeout = setTimeout(showOverlay2, OVERLAY_1_MS);
-    }
-
-    function showOverlay2() {
-        if (!document.body.classList.contains('immersive')) return;
+    immersiveSequenceTimeout = setTimeout(() => {
+        // Switch to Overlay 2 (30s)
         ov1.style.display = 'none';
         ov2.style.display = 'block';
         generateWordCloud();
-        immersiveSequenceTimeout = setTimeout(showOverlay1, OVERLAY_2_MS);
-    }
+    }, 30000);
 }
 
 function generateWordCloud() {
     const container = document.getElementById('word-cloud-container');
     container.innerHTML = '';
-
-    const lines = [
-        document.getElementById('track-title').textContent.trim(),
-        document.getElementById('track-artist').textContent.trim(),
-        currentAlbumName.toUpperCase().trim(),
-        document.getElementById('track-title').textContent.trim()
+    const words = [
+        document.getElementById('track-title').textContent,
+        document.getElementById('track-artist').textContent,
+        currentAlbumName.toUpperCase()
     ];
-
-    lines.forEach((text) => {
-        const line = document.createElement('div');
-        line.className = 'visual2-line';
-        line.textContent = repeatText(text, 10);
-        container.appendChild(line);
-    });
+    for (let i = 0; i < 120; i++) {
+        const span = document.createElement('span');
+        span.className = 'cloud-word';
+        span.textContent = words[i % 3] + " ";
+        span.style.animationDelay = `${i * 0.15}s`;
+        container.appendChild(span);
+    }
 }
 
+/* --- POLLING & UI --- */
 function startPolling(token) {
     updateNowPlaying(token);
     pollInterval = setInterval(() => updateNowPlaying(localStorage.getItem('access_token')), 5000);
@@ -183,7 +169,7 @@ async function updateNowPlaying(token) {
             document.getElementById('track-title').textContent = item.name.toUpperCase();
             document.getElementById('track-artist').textContent = item.artists[0].name.toUpperCase();
             document.getElementById('track-img').src = item.album.images[0].url;
-
+            
             swapBackground(item.album.images[0].url);
             applyPaletteFromImage(item.album.images[0].url);
         }
@@ -204,6 +190,7 @@ function swapBackground(imageUrl) {
     active.classList.remove('active');
 }
 
+/* --- HELPERS --- */
 function generateRandomString(length) {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
