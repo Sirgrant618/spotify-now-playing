@@ -7,10 +7,8 @@ let currentTrackId = null;
 let currentAlbumName = "";
 let activeBgId = 'bg-a';
 let inactivityTimer = null;
-let immersiveSequenceTimeouts = [];
+let immersiveSequenceTimeout = null;
 const IDLE_DELAY_MS = 5000;
-const OVERLAY_1_DURATION_MS = 30000;
-const OVERLAY_2_DURATION_MS = 30000;
 
 /* --- AUTH --- */
 async function redirectToSpotify() {
@@ -101,88 +99,48 @@ function enterImmersiveMode() {
     startImmersiveSequence();
 }
 
-function clearImmersiveSequenceTimers() {
-    immersiveSequenceTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
-    immersiveSequenceTimeouts = [];
-}
-
 function exitImmersiveMode() {
     document.body.classList.remove('immersive');
-    clearImmersiveSequenceTimers();
+    clearTimeout(immersiveSequenceTimeout);
     document.getElementById('immersive-overlay-1').style.display = 'none';
     document.getElementById('immersive-overlay-2').style.display = 'none';
 }
 
 function startImmersiveSequence() {
-    clearImmersiveSequenceTimers();
-
-    document.getElementById('imm-track-1').textContent = document.getElementById('track-title').textContent;
-    document.getElementById('imm-artist-1').textContent = document.getElementById('track-artist').textContent;
-    document.getElementById('imm-album-1').textContent = currentAlbumName.toUpperCase();
-
-    showOverlay1();
-}
-
-function showOverlay1() {
-    if (!document.body.classList.contains('immersive')) return;
-
     const ov1 = document.getElementById('immersive-overlay-1');
     const ov2 = document.getElementById('immersive-overlay-2');
+    
+    // Set Text for Marquee
+    const track=document.getElementById('track-title').textContent;document.getElementById('imm-track-1').textContent=(track+' ').repeat(20);
+    const artist=document.getElementById('track-artist').textContent;document.getElementById('imm-artist-1').textContent=(artist+' ').repeat(20);
+    const album=currentAlbumName.toUpperCase();document.getElementById('imm-album-1').textContent=(album+' ').repeat(20);
 
+    // Show Overlay 1 (30s)
     ov1.style.display = 'block';
     ov2.style.display = 'none';
 
-    const timeoutId = setTimeout(() => {
-        showOverlay2();
-    }, OVERLAY_1_DURATION_MS);
-
-    immersiveSequenceTimeouts.push(timeoutId);
-}
-
-function showOverlay2() {
-    if (!document.body.classList.contains('immersive')) return;
-
-    const ov1 = document.getElementById('immersive-overlay-1');
-    const ov2 = document.getElementById('immersive-overlay-2');
-
-    ov1.style.display = 'none';
-    ov2.style.display = 'block';
-    generateWordCloud();
-
-    const timeoutId = setTimeout(() => {
-        showOverlay1();
-    }, OVERLAY_2_DURATION_MS);
-
-    immersiveSequenceTimeouts.push(timeoutId);
+    immersiveSequenceTimeout = setTimeout(() => {
+        // Switch to Overlay 2 (30s)
+        ov1.style.display = 'none';
+        ov2.style.display = 'block';
+        generateWordCloud();
+    }, 30000);
 }
 
 function generateWordCloud() {
     const container = document.getElementById('word-cloud-container');
+    container.innerHTML = '';
     const words = [
         document.getElementById('track-title').textContent,
         document.getElementById('track-artist').textContent,
         currentAlbumName.toUpperCase()
-    ].filter(Boolean);
-
-    container.innerHTML = '';
-    container.style.animation = 'none';
-    void container.offsetWidth;
-    container.style.animation = '';
-
-    for (let i = 0; i < 16; i++) {
-        const line = document.createElement('div');
-        line.className = 'cloud-line';
-
-        const repetitions = 6 + (i % 3);
-        const lineText = [];
-        for (let j = 0; j < repetitions; j++) {
-            lineText.push(words[(i + j) % words.length]);
-        }
-
-        line.textContent = `${lineText.join('   •   ')}   •   `;
-        line.style.setProperty('--line-offset', `${-12 + (i % 4) * 7 + (i % 2 === 0 ? 0 : 4)}vw`);
-        line.style.animationDelay = `${i * 0.18}s`;
-        container.appendChild(line);
+    ];
+    for (let i = 0; i < 120; i++) {
+        const span = document.createElement('span');
+        span.className = 'cloud-word';
+        span.textContent = words[i % 3] + " ";
+        span.style.animationDelay = `${i * 0.15}s`;
+        container.appendChild(span);
     }
 }
 
