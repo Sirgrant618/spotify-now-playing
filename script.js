@@ -223,9 +223,8 @@ function generateWordCloud() {
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
     
-    // Visualization #2 logic: Word block with dots
-    const unit = `${track} • ${artist} • ${album} • `;
-    const fullRowText = unit.repeat(15); 
+    const unitText = `${track} • ${artist} • ${album} • `;
+    const words = unitText.split(' '); // Split into individual words and dots
 
     const scrollWrapper = document.createElement('div');
     scrollWrapper.className = 'word-block-wrapper';
@@ -233,11 +232,27 @@ function generateWordCloud() {
     for (let i = 0; i < 40; i++) {
         const row = document.createElement('div');
         row.className = 'cloud-row';
-        row.textContent = fullRowText;
         row.style.setProperty('--row-index', i);
+        
+        // Stagger the horizontal start of each row
+        row.style.paddingLeft = `${(i % 4) * 20}px`;
+
+        // Repeat the word sequence for the row
+        for (let j = 0; j < 6; j++) { 
+            words.forEach((word, wordIndex) => {
+                const span = document.createElement('span');
+                span.className = 'word-unit';
+                span.textContent = word + ' ';
+                
+                // Calculate a delay so words fade in one by one across the whole block
+                const appearanceDelay = (i * 0.1) + (j * words.length + wordIndex) * 0.05;
+                span.style.setProperty('--word-delay', `${appearanceDelay}s`);
+                
+                row.appendChild(span);
+            });
+        }
         scrollWrapper.appendChild(row);
     }
-
     container.appendChild(scrollWrapper);
 }
 
