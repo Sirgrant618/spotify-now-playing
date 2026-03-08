@@ -353,24 +353,6 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 @keyframes stackFadeIn {
     to { opacity: 0.6; } 
 }
-
-/*Compliance stuff*/
-.compliance-footer {
-    position: absolute;
-    bottom: 10px;
-    left: 20px;
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
-    font-weight: 300;
-    z-index: 100;
-}
-.compliance-footer a {
-    text-decoration: none;
-}
-/* Hover effect for the track links */
-.text-meta a:hover {
-    opacity: 0.8;
-}
 /* Auth Screens */
 .glass-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 40px; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
 #login-button { background: #fff; color: #000; border: none; padding: 12px 40px; font-weight: 900; cursor: pointer; letter-spacing: 2px; }
