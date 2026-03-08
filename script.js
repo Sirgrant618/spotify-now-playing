@@ -166,7 +166,7 @@ function exitImmersiveMode() {
     document.body.classList.remove('immersive');
     clearTimeout(immersiveSequenceTimeout);
     
-    ['1', '2', '3'].forEach(num => {
+    ['1', '2', '3', '4'].forEach(num => {
         const ov = document.getElementById(`immersive-overlay-${num}`);
         if (ov) {
             ov.style.display = 'none';
@@ -200,27 +200,44 @@ function startImmersiveSequence() {
 }
 
 function triggerNextVisual(overlays) {
+    // 1. Prepare data
     const track = document.getElementById('track-title').textContent;
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
 
+    // 2. Select next index (ensuring we don't repeat the same visual twice)
     let nextIndex;
+    const totalVisuals = 4; // Updated to include the Monolith
     do {
-        nextIndex = Math.floor(Math.random() * overlays.length);
+        nextIndex = Math.floor(Math.random() * totalVisuals);
     } while (nextIndex === lastImmersiveIndex);
     lastImmersiveIndex = nextIndex;
 
-    const activeOverlay = overlays[nextIndex];
+    // 3. Identify the active overlay
+    // We use getElementById for 4 to ensure it's captured if not in the initial array
+    const overlaysList = [
+        document.getElementById('immersive-overlay-1'),
+        document.getElementById('immersive-overlay-2'),
+        document.getElementById('immersive-overlay-3'),
+        document.getElementById('immersive-overlay-4')
+    ];
+    const activeOverlay = overlaysList[nextIndex];
 
+    // 4. Initialization Logic per Visual
     if (nextIndex === 0) {
+        // VISUAL 1: Marquee
         activeOverlay.style.display = 'block';
         document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
         document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
         document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
+
     } else if (nextIndex === 1) {
+        // VISUAL 2: Word Cloud
         activeOverlay.style.display = 'block';
         generateWordCloud();
+
     } else if (nextIndex === 2) {
+        // VISUAL 3: Stacked Drift
         activeOverlay.style.display = 'flex';
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
@@ -232,18 +249,34 @@ function triggerNextVisual(overlays) {
 
         [dTrack, dArtist, dAlbum].forEach(el => {
             el.className = 'drift-text'; 
-            void el.offsetWidth; 
+            void el.offsetWidth; // Trigger reflow to restart animation
         });
 
         dTrack.classList.add('drift-rtl');
         dArtist.classList.add('drift-ltr');
         dAlbum.classList.add('drift-rtl');
+
+    } else if (nextIndex === 3) {
+        // VISUAL 4: Vertical Monolith
+        activeOverlay.style.display = 'flex';
+        const mTrack = document.getElementById('mono-track');
+        const mArtist = document.getElementById('mono-artist');
+        const mAlbum = document.getElementById('mono-album');
+        
+        mTrack.textContent = track;
+        mArtist.textContent = artist;
+        mAlbum.textContent = album;
+
+        const container = activeOverlay.querySelector('.monolith-container');
+        container.classList.remove('monolith-active');
+        void container.offsetWidth; // Trigger reflow to restart animation
+        container.classList.add('monolith-active');
     }
 
-    // Trigger the fade-in
+    // 5. Trigger the fade-in transition
     setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
 
-    // Schedule the next FADE OUT in 25 seconds
+    // 6. Schedule the next transition
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
     immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
 }
