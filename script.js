@@ -163,7 +163,6 @@ function resetInactivityTimer() {
     inactivityTimer = setTimeout(() => enterImmersiveMode(), IDLE_DELAY_MS);
 }
 
-// THIS FUNCTION WAS MISSING
 function enterImmersiveMode() {
     const player = document.getElementById('player-screen');
     if (!player || player.style.display === 'none') return;
@@ -177,12 +176,12 @@ function exitImmersiveMode() {
     
     ['1', '2', '3'].forEach(num => {
         const ov = document.getElementById(`immersive-overlay-${num}`);
-        ov.style.display = 'none';
-        ov.classList.remove('fade-in');
+        if (ov) {
+            ov.style.display = 'none';
+            ov.classList.remove('fade-in');
+        }
     });
 }
-
-//let immersiveStep = 0; // Global or scoped inside startImmersiveSequence
 
 function startImmersiveSequence() {
     const overlays = [
@@ -191,54 +190,69 @@ function startImmersiveSequence() {
         document.getElementById('immersive-overlay-3')
     ];
 
-    // 1. Hide all overlays first
-    overlays.forEach(el => el.style.display = 'none');
+    const track = document.getElementById('track-title').textContent;
+    const artist = document.getElementById('track-artist').textContent;
+    const album = currentAlbumName.toUpperCase();
 
-    // 2. Pick a new random index that is NOT the same as lastImmersiveIndex
+    // 1. Hide all overlays immediately
+    overlays.forEach(ov => {
+        ov.style.display = 'none';
+        ov.classList.remove('fade-in');
+    });
+
+    // 2. Pick a random visual that isn't the previous one
     let nextIndex;
     do {
         nextIndex = Math.floor(Math.random() * overlays.length);
     } while (nextIndex === lastImmersiveIndex);
+    lastImmersiveIndex = nextIndex;
 
-    lastImmersiveIndex = nextIndex; // Update the tracker
     const activeOverlay = overlays[nextIndex];
-    activeOverlay.style.display = 'flex';
-
-    // 3. Trigger specific logic based on the chosen visual
+    
+    // 3. Trigger Specific Logic
     if (nextIndex === 0) {
-        // Overlay 1: Marquee Logic
-        updateMarqueeText();
-    } else if (nextIndex === 1) {
-        // Overlay 2: Word Cloud Logic
+        // Overlay 1: Marquee
+        activeOverlay.style.display = 'block';
+        document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
+        document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
+        document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
+    } 
+    else if (nextIndex === 1) {
+        // Overlay 2: Word Cloud
+        activeOverlay.style.display = 'block';
         generateWordCloud();
-    } else if (nextIndex === 2) {
-        // Overlay 3: Stacked Drift Logic
+    } 
+    else if (nextIndex === 2) {
+        // Overlay 3: Stacked Drift
+        activeOverlay.style.display = 'flex';
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
         const dAlbum = document.getElementById('drift-album');
+        
+        dTrack.textContent = track;
+        dArtist.textContent = artist;
+        dAlbum.textContent = album;
 
-        // Update Text
-        dTrack.innerText = currentTrackTitle;
-        dArtist.innerText = currentArtistName;
-        dAlbum.innerText = currentAlbumName;
-
-        // Reset and trigger animations
+        // Reset animations
         [dTrack, dArtist, dAlbum].forEach(el => {
-            el.className = 'drift-text'; // Strip classes
-            void el.offsetWidth;         // Trigger reflow
+            el.className = 'drift-text'; 
+            void el.offsetWidth; 
         });
 
+        // Start animations with staggered delays
         dTrack.classList.add('drift-rtl');
         dArtist.classList.add('drift-ltr');
         dAlbum.classList.add('drift-rtl');
         
-        // Apply your staggered delays
         dTrack.style.animationDelay = '0s';
-        dArtist.style.animationDelay = '0.5s';
-        dAlbum.style.animationDelay = '1s';
+        dArtist.style.animationDelay = '0.7s';
+        dAlbum.style.animationDelay = '1.4s';
     }
 
-    // 4. Set timer for the next switch (e.g., 25 seconds)
+    // 4. Fade in the chosen overlay
+    setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
+
+    // 5. Schedule the next random visual (every 25 seconds)
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
     immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 25000);
 }
