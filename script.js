@@ -119,9 +119,16 @@ async function updateNowPlaying(token) {
             currentTrackId = item.id;
             currentAlbumName = item.album.name;
             
+            // 1. Update text content
             document.getElementById('track-title').textContent = item.name.toUpperCase();
             document.getElementById('track-artist').textContent = item.artists[0].name.toUpperCase();
             document.getElementById('track-img').src = item.album.images[0].url;
+
+            // 2. Update Clickable Links (New for Compliance)
+            const trackLink = document.getElementById('track-link');
+            const artistLink = document.getElementById('artist-link');
+            if (trackLink) trackLink.href = item.external_urls.spotify;
+            if (artistLink) artistLink.href = item.artists[0].external_urls.spotify;
 
             const artistImgUrl = await getArtistImage(token, item.artists[0].id);
             swapBackground(artistImgUrl || item.album.images[0].url); 

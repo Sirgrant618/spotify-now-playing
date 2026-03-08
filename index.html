@@ -48,6 +48,7 @@
                 <div class="drift-row row-3"><div id="drift-album" class="drift-text"></div></div>
             </div>
         </div>
+
         <div id="immersive-overlay-4" class="immersive-content">
             <div class="vertical-stack-rotate">
                 <div class="stack-line line-1"></div>
@@ -61,16 +62,28 @@
                 <div class="stack-line line-9"></div>
             </div>
         </div>
+
         <div class="zune-layout">
             <div class="art-section">
                 <img id="track-img" src="" alt="Album Art" />
             </div>
 
             <div class="text-meta">
-                <h1 id="track-title">NOTHING PLAYING</h1>
-                <h2 id="track-artist">OPEN SPOTIFY</h2>
+                <a id="track-link" target="_blank" style="text-decoration: none; color: inherit;">
+                    <h1 id="track-title">NOTHING PLAYING</h1>
+                </a>
+                <a id="artist-link" target="_blank" style="text-decoration: none; color: inherit;">
+                    <h2 id="track-artist">OPEN SPOTIFY</h2>
+                </a>
             </div>
         </div>
+
+        <div class="compliance-footer">
+            <span>By using this app, you agree to our <a href="#" style="color: #1DB954;">Privacy Info</a>.</span>
+            <span style="margin: 0 10px;">|</span>
+            <span>To revoke access, visit <a href="https://www.spotify.com/account/apps/" target="_blank" style="color: #1DB954;">Spotify Apps</a>.</span>
+        </div>
+
         <button id="fullscreen-button" onclick="toggleFullscreen()" aria-label="Toggle Fullscreen">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                 <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
