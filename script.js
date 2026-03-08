@@ -329,3 +329,17 @@ async function refreshAccessToken() {
         redirectToSpotify();
     }
 }
+//fullscreen stuff
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        // Enter Fullscreen
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        // Exit Fullscreen
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}

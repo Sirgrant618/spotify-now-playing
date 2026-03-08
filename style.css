@@ -42,6 +42,36 @@ html, body {
     text-align: center;
     font-weight: 300;
 }
+/* Fullscreen Button Styling */
+#fullscreen-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--panel-border);
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.5s ease;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#fullscreen-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Hide button when in immersive mode */
+body.immersive #fullscreen-button {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-20px);
+}
 /* --- BACKGROUND SYSTEM --- */
 #bg-wrap {
     position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #000;
