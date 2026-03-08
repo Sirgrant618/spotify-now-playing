@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;700;900&display=swap');
 
 :root {
-    --spot-1: #ff0046; 
+    --spot-1: #ff0033; 
     --spot-2: #00adef;
-    --spot-3: #ff8500;
+    --spot-3: #ff7600;
     --text-color: #ffffff;
     --border-color: rgba(255, 255, 255, 0.95);
     --panel-bg: rgba(255, 255, 255, 0.06);
