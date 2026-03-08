@@ -165,7 +165,7 @@ function enterImmersiveMode() {
 function exitImmersiveMode() {
     document.body.classList.remove('immersive');
     clearTimeout(immersiveSequenceTimeout);
-    
+
     ['1', '2', '3', '4'].forEach(num => {
         const ov = document.getElementById(`immersive-overlay-${num}`);
         if (ov) {
@@ -173,6 +173,12 @@ function exitImmersiveMode() {
             ov.classList.remove('fade-in');
         }
     });
+
+    // Reset monolith animation state
+    const monoContainer = document.querySelector('#immersive-overlay-4 .monolith-container');
+    if (monoContainer) {
+        monoContainer.classList.remove('monolith-active');
+    }
 }
 
 // --- SEQUENCING START ---
@@ -208,86 +214,89 @@ function startImmersiveSequence() {
     }
 }
 
-function triggerNextVisual(overlays) {
-    // 1. Prepare data
+ffunction triggerNextVisual() {
     const track = document.getElementById('track-title').textContent;
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
 
-    // 2. Select next index (ensuring we don't repeat the same visual twice)
-    let nextIndex;
-    const totalVisuals = 4; // Updated to include the Monolith
-    do {
-        nextIndex = Math.floor(Math.random() * totalVisuals);
-    } while (nextIndex === lastImmersiveIndex);
-    lastImmersiveIndex = nextIndex;
-
-    // 3. Identify the active overlay
-    // We use getElementById for 4 to ensure it's captured if not in the initial array
-    const overlaysList = [
+    const overlays = [
         document.getElementById('immersive-overlay-1'),
         document.getElementById('immersive-overlay-2'),
         document.getElementById('immersive-overlay-3'),
         document.getElementById('immersive-overlay-4')
     ];
-    const activeOverlay = overlaysList[nextIndex];
 
-    // 4. Initialization Logic per Visual
+    // Hide everything first so each visual starts clean
+    overlays.forEach(ov => {
+        if (!ov) return;
+        ov.style.display = 'none';
+        ov.classList.remove('fade-in');
+    });
+
+    let nextIndex;
+    do {
+        nextIndex = Math.floor(Math.random() * overlays.length);
+    } while (nextIndex === lastImmersiveIndex);
+
+    lastImmersiveIndex = nextIndex;
+    const activeOverlay = overlays[nextIndex];
+
     if (nextIndex === 0) {
-        // VISUAL 1: Marquee
         activeOverlay.style.display = 'block';
         document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
         document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
         document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
+    }
 
-    } else if (nextIndex === 1) {
-        // VISUAL 2: Word Cloud
+    if (nextIndex === 1) {
         activeOverlay.style.display = 'block';
         generateWordCloud();
+    }
 
-    } else if (nextIndex === 2) {
-        // VISUAL 3: Stacked Drift
+    if (nextIndex === 2) {
         activeOverlay.style.display = 'flex';
+
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
         const dAlbum = document.getElementById('drift-album');
-        
+
         dTrack.textContent = track;
         dArtist.textContent = artist;
         dAlbum.textContent = album;
 
         [dTrack, dArtist, dAlbum].forEach(el => {
-            el.className = 'drift-text'; 
-            void el.offsetWidth; // Trigger reflow to restart animation
+            el.className = 'drift-text';
+            void el.offsetWidth;
         });
 
         dTrack.classList.add('drift-rtl');
         dArtist.classList.add('drift-ltr');
         dAlbum.classList.add('drift-rtl');
+    }
 
-    } else if (nextIndex === 3) {
-        // VISUAL 4: Vertical Monolith
+    if (nextIndex === 3) {
         activeOverlay.style.display = 'flex';
-        
-        // Select all elements by class to fill all 9 slots
+
         const tracks = activeOverlay.querySelectorAll('.mono-track');
         const artists = activeOverlay.querySelectorAll('.mono-artist');
         const albums = activeOverlay.querySelectorAll('.mono-album');
-        
+        const container = activeOverlay.querySelector('.monolith-container');
+
         tracks.forEach(el => el.textContent = track);
         artists.forEach(el => el.textContent = artist);
         albums.forEach(el => el.textContent = album);
 
-        const container = activeOverlay.querySelector('.monolith-container');
         container.classList.remove('monolith-active');
-        void container.offsetWidth; // Trigger reflow
+        void container.offsetWidth;
         container.classList.add('monolith-active');
     }
 
-    // 5. Trigger the fade-in transition
-    setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            activeOverlay.classList.add('fade-in');
+        });
+    });
 
-    // 6. Schedule the next transition
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
     immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
 }
