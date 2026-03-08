@@ -298,7 +298,8 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     display: none;
     justify-content: center;
     align-items: center;
-    perspective: 1000px;
+    /* Added perspective to make the Y-rotation look 3D */
+    perspective: 1200px; 
 }
 
 .vertical-stack-rotate {
@@ -306,61 +307,47 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transform: rotate(90deg); /* Rotate the whole container */
-    width: 100vh; /* Filling the window width since it's rotated */
+    /* Rotated 90deg to stay vertical, then adding the Y-axis oscillation */
+    transform: rotate(90deg); 
+    width: 100vh;
     gap: 0.5vh;
+    animation: yRotateContainer 8s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
 }
 
 .stack-line {
     white-space: nowrap;
     text-transform: uppercase;
-    opacity: 0;
+    /* Set opacity to 60% as requested */
+    opacity: 0; 
+    color: rgba(255, 255, 255, 0.6); 
     line-height: 0.9;
     will-change: transform, opacity;
-    /* Added 'traverse' animation here */
     animation: 
         stackFadeIn 1s ease-out forwards,
         traverse var(--trav-speed) linear infinite alternate;
 }
 
-/* Individual Styles for 9 Lines */
+/* Base Styles for Line Variations */
 .line-1, .line-4, .line-7 { font-size: 18vw; font-weight: 900; letter-spacing: -8px; }
 .line-2, .line-5, .line-8 { font-size: 15vw; font-weight: 200; letter-spacing: 2px; }
 .line-3, .line-6, .line-9 { font-size: 16vw; font-weight: 500; letter-spacing: -2px; }
 
-/* Hardcoded Flip & Glide Animations 
-   --trav-speed: speed of movement
-   --trav-dist: how far it moves (positive for right, negative for left)
-*/
-.line-1 { animation-delay: 0.8s; --rot-speed: 6s; --rot-deg: 35deg;  --trav-speed: 18s; --trav-dist: 12vw; }
-.line-2 { animation-delay: 0.2s; --rot-speed: 8s; --rot-deg: -25deg; --trav-speed: 22s; --trav-dist: -8vw; }
-.line-3 { animation-delay: 1.1s; --rot-speed: 5s; --rot-deg: 40deg;  --trav-speed: 15s; --trav-dist: 15vw; }
-.line-4 { animation-delay: 0.5s; --rot-speed: 7s; --rot-deg: -40deg; --trav-speed: 20s; --trav-dist: -10vw; }
-.line-5 { animation-delay: 1.3s; --rot-speed: 9s; --rot-deg: 20deg;  --trav-speed: 25s; --trav-dist: 5vw; }
-.line-6 { animation-delay: 0.1s; --rot-speed: 6.5s; --rot-deg: -30deg; --trav-speed: 17s; --trav-dist: -15vw; }
-.line-7 { animation-delay: 0.9s; --rot-speed: 7.5s; --rot-deg: 38deg; --trav-speed: 21s; --trav-dist: 10vw; }
-.line-8 { animation-delay: 0.4s; --rot-speed: 5.5s; --rot-deg: -15deg; --trav-speed: 19s; --trav-dist: -12vw; }
-.line-9 { animation-delay: 1.5s; --rot-speed: 8.5s; --rot-deg: 40deg; --trav-speed: 24s; --trav-dist: 8vw; }
+/* Remove the ::after pseudo-element logic entirely */
+.stack-line::after { content: none !important; }
 
-/* Apply constant X-rotation to the inner content */
-.stack-line::after {
-    content: attr(data-text);
-    display: block;
-    animation: xRotate var(--rot-speed) cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+/* New Container Animation: Rotates the entire stack on Y axis */
+@keyframes yRotateContainer {
+    0% { transform: rotate(90deg) rotateY(-40deg); }
+    100% { transform: rotate(90deg) rotateY(40deg); }
 }
 
 @keyframes traverse {
-    0% { transform: translateX(calc(var(--trav-dist) * -1)); }
-    100% { transform: translateX(var(--trav-dist)); }
-}
-
-@keyframes xRotate {
-    0% { transform: rotateX(0deg); }
-    100% { transform: rotateX(var(--rot-deg)); }
+    0% { transform: translateX(var(--trav-start)); }
+    100% { transform: translateX(var(--trav-end)); }
 }
 
 @keyframes stackFadeIn {
-    to { opacity: 1; }
+    to { opacity: 0.6; } /* Match requested opacity */
 }
 /* Auth Screens */
 .glass-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; padding: 40px; background: rgba(0,0,0,0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }

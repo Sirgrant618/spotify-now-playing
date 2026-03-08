@@ -259,24 +259,23 @@ function triggerNextVisual(overlays) {
         const content = [track, artist, album];
         
         lines.forEach((line, i) => {
-            // 1. Set the text content
+            // 1. Set the text content directly to the element
             const textContent = content[i % 3]; 
-            line.setAttribute('data-text', textContent);
+            line.textContent = textContent;
             
             // 2. Randomize Gliding (Traversal)
             const moveRight = Math.random() > 0.5;
-            const distance = 10 + Math.random() * 20; // Drifts between 10vw and 30vw
-            const speed = 15 + Math.random() * 20;    // Takes between 15s and 35s
+            const distance = 10 + Math.random() * 20; 
+            const speed = 15 + Math.random() * 20;    
             
             const startX = moveRight ? `-${distance}vw` : `${distance}vw`;
             const endX = moveRight ? `${distance}vw` : `-${distance}vw`;
 
-            // 3. Inject random values into CSS variables
             line.style.setProperty('--trav-start', startX);
             line.style.setProperty('--trav-end', endX);
             line.style.setProperty('--trav-speed', `${speed}s`);
             
-            // 4. Re-trigger the fade-in and glide animations
+            // 3. Reset animations
             line.style.animation = 'none';
             void line.offsetWidth; 
             line.style.animation = null; 
