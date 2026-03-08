@@ -177,23 +177,32 @@ function exitImmersiveMode() {
 
 // --- SEQUENCING START ---
 function startImmersiveSequence() {
+    // UPDATED: Include the 4th overlay in this list so the sequence sees it
     const overlays = [
         document.getElementById('immersive-overlay-1'),
         document.getElementById('immersive-overlay-2'),
-        document.getElementById('immersive-overlay-3')
+        document.getElementById('immersive-overlay-3'),
+        document.getElementById('immersive-overlay-4')
     ];
 
     // If a visual is already showing, fade it out first
     if (lastImmersiveIndex !== -1) {
         const currentOverlay = overlays[lastImmersiveIndex];
-        currentOverlay.classList.remove('fade-in');
+        
+        // Safety check to ensure the element exists before trying to modify it
+        if (currentOverlay) {
+            currentOverlay.classList.remove('fade-in');
 
-        // Wait 5s for the CSS transition to finish before hiding and moving to next
-        setTimeout(() => {
-            if (!document.body.classList.contains('immersive')) return;
-            currentOverlay.style.display = 'none';
+            // Wait for the 5s CSS transition to finish before hiding and moving to next
+            setTimeout(() => {
+                if (!document.body.classList.contains('immersive')) return;
+                currentOverlay.style.display = 'none';
+                triggerNextVisual(overlays);
+            }, 5000); 
+        } else {
+            // Fallback if the index was somehow out of sync
             triggerNextVisual(overlays);
-        }, 5000); 
+        }
     } else {
         triggerNextVisual(overlays);
     }
