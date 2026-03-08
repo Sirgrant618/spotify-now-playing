@@ -17,10 +17,15 @@ async function redirectToSpotify() {
     localStorage.setItem('code_verifier', verifier);
     const challenge = await generateCodeChallenge(verifier);
     const params = new URLSearchParams({
-        response_type: 'code', client_id: clientId, scope,
-        code_challenge_method: 'S256', code_challenge: challenge, redirect_uri: redirectUri
+        response_type: 'code', 
+        client_id: clientId, 
+        scope,
+        code_challenge_method: 'S256', 
+        code_challenge: challenge, 
+        redirect_uri: redirectUri
     });
-    window.location.href = `https://accounts.spotify.com/authorize?$${params.toString()}`;
+    // Corrected template literal with backticks
+    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
