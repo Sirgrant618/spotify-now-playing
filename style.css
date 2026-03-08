@@ -317,31 +317,41 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     opacity: 0;
     line-height: 0.9;
     will-change: transform, opacity;
-    animation: stackFadeIn 1s ease-out forwards;
+    /* Added 'traverse' animation here */
+    animation: 
+        stackFadeIn 1s ease-out forwards,
+        traverse var(--trav-speed) linear infinite alternate;
 }
 
-/* Individual Styles for 9 Lines (Cycling 3x: Title, Artist, Album) */
-/* Sizes min 15vw, weights min 200 */
+/* Individual Styles for 9 Lines */
 .line-1, .line-4, .line-7 { font-size: 18vw; font-weight: 900; letter-spacing: -8px; }
 .line-2, .line-5, .line-8 { font-size: 15vw; font-weight: 200; letter-spacing: 2px; }
 .line-3, .line-6, .line-9 { font-size: 16vw; font-weight: 500; letter-spacing: -2px; }
 
-/* Randomized Flip Animations */
-.line-1 { animation-delay: 0.8s; --rot-speed: 6s; --rot-deg: 35deg; }
-.line-2 { animation-delay: 0.2s; --rot-speed: 8s; --rot-deg: -25deg; }
-.line-3 { animation-delay: 1.1s; --rot-speed: 5s; --rot-deg: 40deg; }
-.line-4 { animation-delay: 0.5s; --rot-speed: 7s; --rot-deg: -40deg; }
-.line-5 { animation-delay: 1.3s; --rot-speed: 9s; --rot-deg: 20deg; }
-.line-6 { animation-delay: 0.1s; --rot-speed: 6.5s; --rot-deg: -30deg; }
-.line-7 { animation-delay: 0.9s; --rot-speed: 7.5s; --rot-deg: 38deg; }
-.line-8 { animation-delay: 0.4s; --rot-speed: 5.5s; --rot-deg: -15deg; }
-.line-9 { animation-delay: 1.5s; --rot-speed: 8.5s; --rot-deg: 40deg; }
+/* Hardcoded Flip & Glide Animations 
+   --trav-speed: speed of movement
+   --trav-dist: how far it moves (positive for right, negative for left)
+*/
+.line-1 { animation-delay: 0.8s; --rot-speed: 6s; --rot-deg: 35deg;  --trav-speed: 18s; --trav-dist: 12vw; }
+.line-2 { animation-delay: 0.2s; --rot-speed: 8s; --rot-deg: -25deg; --trav-speed: 22s; --trav-dist: -8vw; }
+.line-3 { animation-delay: 1.1s; --rot-speed: 5s; --rot-deg: 40deg;  --trav-speed: 15s; --trav-dist: 15vw; }
+.line-4 { animation-delay: 0.5s; --rot-speed: 7s; --rot-deg: -40deg; --trav-speed: 20s; --trav-dist: -10vw; }
+.line-5 { animation-delay: 1.3s; --rot-speed: 9s; --rot-deg: 20deg;  --trav-speed: 25s; --trav-dist: 5vw; }
+.line-6 { animation-delay: 0.1s; --rot-speed: 6.5s; --rot-deg: -30deg; --trav-speed: 17s; --trav-dist: -15vw; }
+.line-7 { animation-delay: 0.9s; --rot-speed: 7.5s; --rot-deg: 38deg; --trav-speed: 21s; --trav-dist: 10vw; }
+.line-8 { animation-delay: 0.4s; --rot-speed: 5.5s; --rot-deg: -15deg; --trav-speed: 19s; --trav-dist: -12vw; }
+.line-9 { animation-delay: 1.5s; --rot-speed: 8.5s; --rot-deg: 40deg; --trav-speed: 24s; --trav-dist: 8vw; }
 
-/* Apply constant X-rotation to all */
+/* Apply constant X-rotation to the inner content */
 .stack-line::after {
     content: attr(data-text);
     display: block;
     animation: xRotate var(--rot-speed) cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+@keyframes traverse {
+    0% { transform: translateX(calc(var(--trav-dist) * -1)); }
+    100% { transform: translateX(var(--trav-dist)); }
 }
 
 @keyframes xRotate {

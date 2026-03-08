@@ -164,14 +164,13 @@ function enterImmersiveMode() {
 
 function exitImmersiveMode() {
     document.body.classList.remove('immersive');
-    clearTimeout(immersiveSequenceTimeout);
+    if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
     
-    ['1', '2', '3', '4'].forEach(num => {
-        const ov = document.getElementById(`immersive-overlay-${num}`);
-        if (ov) {
-            ov.style.display = 'none';
-            ov.classList.remove('fade-in');
-        }
+    // Select all immersive containers and hide them
+    const overlays = document.querySelectorAll('.immersive-content');
+    overlays.forEach(ov => {
+        ov.style.display = 'none';
+        ov.classList.remove('fade-in');
     });
 }
 
@@ -187,12 +186,12 @@ function startImmersiveSequence() {
     // If a visual is already showing, fade it out first
     if (lastImmersiveIndex !== -1) {
         const currentOverlay = overlays[lastImmersiveIndex];
-        currentOverlay.classList.remove('fade-in');
+        if (currentOverlay) currentOverlay.classList.remove('fade-in');
 
-        // Wait 5s for the CSS transition to finish before hiding and moving to next
+        // Wait for the CSS transition to finish before hiding and moving to next
         setTimeout(() => {
             if (!document.body.classList.contains('immersive')) return;
-            currentOverlay.style.display = 'none';
+            if (currentOverlay) currentOverlay.style.display = 'none';
             triggerNextVisual(overlays);
         }, 5000); 
     } else {
@@ -215,8 +214,10 @@ function triggerNextVisual(overlays) {
 
     // Reset all overlays to hidden before showing the active one
     overlays.forEach(ov => {
-        ov.style.display = 'none';
-        ov.classList.remove('fade-in');
+        if (ov) {
+            ov.style.display = 'none';
+            ov.classList.remove('fade-in');
+        }
     });
 
     if (nextIndex === 0) {
@@ -252,17 +253,30 @@ function triggerNextVisual(overlays) {
         dAlbum.classList.add('drift-rtl');
 
     } else if (nextIndex === 3) {
-        // Visual 4: Vertical Stack Rotate
+        // Visual 4: Vertical Stack Rotate with Randomized Gliding
         activeOverlay.style.display = 'flex';
         const lines = activeOverlay.querySelectorAll('.stack-line');
         const content = [track, artist, album];
         
         lines.forEach((line, i) => {
-            // Cycle through Title -> Artist -> Album every 3 lines
+            // 1. Set the text content
             const textContent = content[i % 3]; 
             line.setAttribute('data-text', textContent);
             
-            // Re-trigger the fade-in animation for each line
+            // 2. Randomize Gliding (Traversal)
+            const moveRight = Math.random() > 0.5;
+            const distance = 10 + Math.random() * 20; // Drifts between 10vw and 30vw
+            const speed = 15 + Math.random() * 20;    // Takes between 15s and 35s
+            
+            const startX = moveRight ? `-${distance}vw` : `${distance}vw`;
+            const endX = moveRight ? `${distance}vw` : `-${distance}vw`;
+
+            // 3. Inject random values into CSS variables
+            line.style.setProperty('--trav-start', startX);
+            line.style.setProperty('--trav-end', endX);
+            line.style.setProperty('--trav-speed', `${speed}s`);
+            
+            // 4. Re-trigger the fade-in and glide animations
             line.style.animation = 'none';
             void line.offsetWidth; 
             line.style.animation = null; 
@@ -270,7 +284,9 @@ function triggerNextVisual(overlays) {
     }
 
     // Trigger the container fade-in
-    setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
+    setTimeout(() => {
+        if (activeOverlay) activeOverlay.classList.add('fade-in');
+    }, 50);
 
     // Schedule the next transition
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
