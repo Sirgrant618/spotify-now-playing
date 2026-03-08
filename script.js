@@ -8,7 +8,7 @@ let currentAlbumName = "";
 let activeBgId = 'bg-a';
 let inactivityTimer = null;
 let immersiveSequenceTimeout = null;
-let lastImmersiveIndex = -1; // Track the previous visual
+let lastImmersiveIndex = -1; 
 const IDLE_DELAY_MS = 5000;
 
 /* --- AUTH --- */
@@ -20,7 +20,8 @@ async function redirectToSpotify() {
         response_type: 'code', client_id: clientId, scope,
         code_challenge_method: 'S256', code_challenge: challenge, redirect_uri: redirectUri
     });
-    window.location.href = `https://accounts.spotify.com/authorize?$${params.toString()}`;
+    // Use backticks for the template literal
+    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -31,7 +32,6 @@ bootstrapAuth();
 async function bootstrapAuth() {
     if (code) { 
         await handleCallback(code); 
-        // Remove the code from the URL so a refresh doesn't trigger handleCallback again
         window.history.replaceState({}, document.title, redirectUri);
         return; 
     }
@@ -44,7 +44,6 @@ async function bootstrapAuth() {
         startPolling(accessToken);
         resetInactivityTimer();
     } else if (refreshToken) {
-        // If we don't have an access token but HAVE a refresh token, use it!
         const newToken = await refreshAccessToken();
         if (newToken) {
             showPlayer();
@@ -87,12 +86,9 @@ async function getArtistImage(token, artistId) {
 
 /* --- POLLING & UI --- */
 function startPolling(token) {
-    // Clear any existing interval before starting a new one
     if (pollInterval) clearInterval(pollInterval); 
-    
     updateNowPlaying(token);
     pollInterval = setInterval(() => {
-        // Always get the latest token from storage in case it was refreshed
         const currentToken = localStorage.getItem('access_token');
         updateNowPlaying(currentToken);
     }, 5000);
@@ -104,18 +100,14 @@ async function updateNowPlaying(token) {
             headers: { Authorization: `Bearer ${token}` }
         });
 
-        // --- NEW REFRESH LOGIC ---
         if (res.status === 401) {
-            console.log("Token expired, refreshing...");
             const newToken = await refreshAccessToken();
             if (newToken) {
-                // Stop the old interval and start a new one with the fresh token
                 clearInterval(pollInterval);
                 startPolling(newToken);
             }
             return; 
         }
-        // --- END REFRESH LOGIC ---
 
         if (res.status === 204 || !res.ok) return;
         
@@ -183,6 +175,7 @@ function exitImmersiveMode() {
     });
 }
 
+// --- SEQUENCING START ---
 function startImmersiveSequence() {
     const overlays = [
         document.getElementById('immersive-overlay-1'),
@@ -190,17 +183,27 @@ function startImmersiveSequence() {
         document.getElementById('immersive-overlay-3')
     ];
 
+    // If a visual is already showing, fade it out first
+    if (lastImmersiveIndex !== -1) {
+        const currentOverlay = overlays[lastImmersiveIndex];
+        currentOverlay.classList.remove('fade-in');
+
+        // Wait 5s for the CSS transition to finish before hiding and moving to next
+        setTimeout(() => {
+            if (!document.body.classList.contains('immersive')) return;
+            currentOverlay.style.display = 'none';
+            triggerNextVisual(overlays);
+        }, 5000); 
+    } else {
+        triggerNextVisual(overlays);
+    }
+}
+
+function triggerNextVisual(overlays) {
     const track = document.getElementById('track-title').textContent;
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
 
-    // 1. Hide all overlays immediately
-    overlays.forEach(ov => {
-        ov.style.display = 'none';
-        ov.classList.remove('fade-in');
-    });
-
-    // 2. Pick a random visual that isn't the previous one
     let nextIndex;
     do {
         nextIndex = Math.floor(Math.random() * overlays.length);
@@ -208,22 +211,16 @@ function startImmersiveSequence() {
     lastImmersiveIndex = nextIndex;
 
     const activeOverlay = overlays[nextIndex];
-    
-    // 3. Trigger Specific Logic
+
     if (nextIndex === 0) {
-        // Overlay 1: Marquee
         activeOverlay.style.display = 'block';
         document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
         document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
         document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
-    } 
-    else if (nextIndex === 1) {
-        // Overlay 2: Word Cloud
+    } else if (nextIndex === 1) {
         activeOverlay.style.display = 'block';
         generateWordCloud();
-    } 
-    else if (nextIndex === 2) {
-        // Overlay 3: Stacked Drift
+    } else if (nextIndex === 2) {
         activeOverlay.style.display = 'flex';
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
@@ -233,28 +230,22 @@ function startImmersiveSequence() {
         dArtist.textContent = artist;
         dAlbum.textContent = album;
 
-        // Reset animations
         [dTrack, dArtist, dAlbum].forEach(el => {
             el.className = 'drift-text'; 
             void el.offsetWidth; 
         });
 
-        // Start animations with staggered delays
         dTrack.classList.add('drift-rtl');
         dArtist.classList.add('drift-ltr');
         dAlbum.classList.add('drift-rtl');
-        
-        dTrack.style.animationDelay = '0s';
-        dArtist.style.animationDelay = '0.7s';
-        dAlbum.style.animationDelay = '1.4s';
     }
 
-    // 4. Fade in the chosen overlay
+    // Trigger the fade-in
     setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
 
-    // 5. Schedule the next random visual (every 25 seconds)
+    // Schedule the next FADE OUT in 25 seconds
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
-    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
+    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 25000);
 }
 
 function generateWordCloud() {
@@ -266,7 +257,7 @@ function generateWordCloud() {
     const album = currentAlbumName.toUpperCase();
     
     const unitText = `${track} • ${artist} • ${album} • `;
-    const words = unitText.split(' '); // Split into individual words and dots
+    const words = unitText.split(' ');
 
     const scrollWrapper = document.createElement('div');
     scrollWrapper.className = 'word-block-wrapper';
@@ -275,9 +266,6 @@ function generateWordCloud() {
         const row = document.createElement('div');
         row.className = 'cloud-row';
         row.style.setProperty('--row-index', i);
-        
-        // RANDOM STAGGER:
-        // Generates a random offset between 0 and 150 pixels for every single row
         const randomOffset = Math.floor(Math.random() * 150);
         row.style.paddingLeft = `${randomOffset}px`;
 
@@ -286,10 +274,8 @@ function generateWordCloud() {
                 const span = document.createElement('span');
                 span.className = 'word-unit';
                 span.textContent = word + ' ';
-                
                 const appearanceDelay = (i * 0.1) + (j * words.length + wordIndex) * 0.05;
                 span.style.setProperty('--word-delay', `${appearanceDelay}s`);
-                
                 row.appendChild(span);
             });
         }
@@ -302,11 +288,13 @@ function showPlayer() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('player-screen').style.display = 'block';
 }
+
 function generateRandomString(length) {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
     return values.reduce((acc, x) => acc + possible[x % possible.length], '');
 }
+
 async function generateCodeChallenge(verifier) {
     const data = new TextEncoder().encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
@@ -333,13 +321,11 @@ async function refreshAccessToken() {
 
     if (data.access_token) {
         localStorage.setItem('access_token', data.access_token);
-        // If they sent a new refresh token, swap the old one out
         if (data.refresh_token) {
             localStorage.setItem('refresh_token', data.refresh_token);
         }
         return data.access_token;
     } else {
-        // If the refresh token itself is expired/revoked, force a login
         redirectToSpotify();
     }
 }
