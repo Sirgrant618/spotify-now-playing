@@ -183,24 +183,39 @@ function exitImmersiveMode() {
     });
 }
 
-function startImmersiveSequence() {
+ffunction startImmersiveSequence() {
     const overlays = [
         document.getElementById('immersive-overlay-1'),
         document.getElementById('immersive-overlay-2'),
         document.getElementById('immersive-overlay-3')
     ];
 
+    // --- PHASE 1: THE FADE OUT ---
+    if (lastImmersiveIndex !== -1) {
+        const currentOverlay = overlays[lastImmersiveIndex];
+        currentOverlay.classList.remove('fade-in');
+
+        // Wait 5000ms for the CSS opacity transition to hit 0
+        setTimeout(() => {
+            // Check if we are still in immersive mode before proceeding
+            if (!document.body.classList.contains('immersive')) return;
+
+            currentOverlay.style.display = 'none';
+            // --- PHASE 2: THE NEXT SELECTION ---
+            triggerNextVisual(overlays);
+        }, 5000); 
+    } else {
+        // Initial run when entering immersive mode for the first time
+        triggerNextVisual(overlays);
+    }
+}
+
+function triggerNextVisual(overlays) {
     const track = document.getElementById('track-title').textContent;
     const artist = document.getElementById('track-artist').textContent;
     const album = currentAlbumName.toUpperCase();
 
-    // 1. Hide all overlays immediately
-    overlays.forEach(ov => {
-        ov.style.display = 'none';
-        ov.classList.remove('fade-in');
-    });
-
-    // 2. Pick a random visual that isn't the previous one
+    // 1. Pick a random visual that isn't the previous one
     let nextIndex;
     do {
         nextIndex = Math.floor(Math.random() * overlays.length);
@@ -208,22 +223,19 @@ function startImmersiveSequence() {
     lastImmersiveIndex = nextIndex;
 
     const activeOverlay = overlays[nextIndex];
-    
-    // 3. Trigger Specific Logic
+
+    // 2. Setup content based on selection
     if (nextIndex === 0) {
-        // Overlay 1: Marquee
         activeOverlay.style.display = 'block';
         document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
         document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
         document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
     } 
     else if (nextIndex === 1) {
-        // Overlay 2: Word Cloud
         activeOverlay.style.display = 'block';
         generateWordCloud();
     } 
     else if (nextIndex === 2) {
-        // Overlay 3: Stacked Drift
         activeOverlay.style.display = 'flex';
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
@@ -233,13 +245,11 @@ function startImmersiveSequence() {
         dArtist.textContent = artist;
         dAlbum.textContent = album;
 
-        // Reset animations
         [dTrack, dArtist, dAlbum].forEach(el => {
             el.className = 'drift-text'; 
-            void el.offsetWidth; 
+            void el.offsetWidth; // Force reflow to restart animations
         });
 
-        // Start animations with staggered delays
         dTrack.classList.add('drift-rtl');
         dArtist.classList.add('drift-ltr');
         dAlbum.classList.add('drift-rtl');
@@ -249,12 +259,12 @@ function startImmersiveSequence() {
         dAlbum.style.animationDelay = '1.4s';
     }
 
-    // 4. Fade in the chosen overlay
+    // 3. Fade in the new selection
     setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
 
-    // 5. Schedule the next random visual (every 25 seconds)
+    // 4. Schedule the next FADE OUT
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
-    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
+    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 25000);
 }
 
 function generateWordCloud() {
