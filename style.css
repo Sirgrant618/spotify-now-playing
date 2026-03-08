@@ -311,7 +311,7 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     transform: rotate(90deg); 
     width: 100vh;
     gap: 0.5vh;
-    animation: yRotateContainer 8s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+    animation: xRotateContainer 8s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
 }
 
 .stack-line {
@@ -337,8 +337,8 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
 
 /* New Container Animation: Rotates the entire stack on Y axis */
 @keyframes yRotateContainer {
-    0% { transform: rotate(90deg) rotateY(-40deg); }
-    100% { transform: rotate(90deg) rotateY(40deg); }
+    0% { transform: rotate(90deg) rotateX(-20deg); }
+    100% { transform: rotate(90deg) rotateX(20deg); }
 }
 
 @keyframes traverse {
