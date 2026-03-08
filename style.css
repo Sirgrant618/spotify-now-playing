@@ -313,7 +313,7 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     gap: 0.5vh;
     /* Slowed to 14s and renamed for clarity; uses rotateX to swing 
        horizontally relative to the screen after the 90deg rotation */
-    animation: subtle3DSwing 20s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+    animation: subtle3DSwing 23s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
     transform-style: preserve-3d;
 }
 
@@ -341,8 +341,8 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
    controls the "left-right" swing visually. Reduced to 20deg for subtlety.
 */
 @keyframes subtle3DSwing {
-    0% { transform: rotate(90deg) rotateX(-15deg); }
-    100% { transform: rotate(90deg) rotateX(15deg); }
+    0% { transform: rotate(90deg) rotateX(-10deg); }
+    100% { transform: rotate(90deg) rotateX(10deg); }
 }
 
 @keyframes traverse {
