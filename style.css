@@ -293,50 +293,53 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     85% { transform: translateX(0); opacity: 1; animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0); }
     100% { transform: translateX(150vw); opacity: 0; }
 }
-/* Visualization #4 (Vertical Monolith) */
+/* Updated Visualization #4 (Vertical Monolith) */
 #immersive-overlay-4 {
     display: none;
     justify-content: center;
     align-items: center;
-    perspective: 1000px; /* Enables the 3D effect */
+    perspective: 1200px; /* Increased slightly for better depth */
 }
 
 .monolith-container {
     display: flex;
-    align-items: flex-end; /* Aligns text lines at different "ground" levels */
-    gap: 4vw;
+    align-items: flex-end; 
+    gap: 2.5vw; /* Tightened gap to fit 9 lines better */
     height: 100vh;
-    transform: translateY(110vh); /* Start below screen */
-}
-
-/* The Slide-Up/Slide-Down Animation */
-.monolith-active {
-    animation: monolithRiseFall 25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(110vh);
 }
 
 .mono-text {
-    font-size: clamp(4rem, 10vw, 12rem);
+    font-size: clamp(2rem, 6vw, 8rem); /* Scaled down slightly to fit 9 columns */
     font-weight: 900;
     text-transform: uppercase;
     white-space: nowrap;
-    writing-mode: vertical-rl; /* Vertical text orientation */
-    transform: rotate(180deg); /* Ensures it reads bottom-to-top */
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
     color: var(--text-color);
     line-height: 1;
+    transition: transform 0.5s ease;
 }
 
-/* Individual Y-Axis Rotations and Heights */
-#mono-track { 
-    transform: rotate(180deg) rotateY(15deg); 
+/* Individual Rotations and staggered heights for a more organic "Zune" feel */
+.monolith-container .mono-track { 
+    transform: rotate(180deg) rotateY(30deg); 
     margin-bottom: 5vh; 
 }
-#mono-artist { 
-    transform: rotate(180deg) rotateY(-15deg); 
+.monolith-container .mono-artist { 
+    transform: rotate(180deg) rotateY(-30deg); 
     margin-bottom: 15vh; 
 }
-#mono-album { 
-    transform: rotate(180deg) rotateY(10deg); 
+.monolith-container .mono-album { 
+    transform: rotate(180deg) rotateY(20deg); 
     margin-bottom: 2vh; 
+}
+
+@keyframes monolithRiseFall {
+    0% { transform: translateY(110vh); opacity: 0; }
+    10% { transform: translateY(0); opacity: 1; }
+    90% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(110vh); opacity: 0; }
 }
 
 @keyframes monolithRiseFall {

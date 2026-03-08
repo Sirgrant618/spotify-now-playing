@@ -268,17 +268,19 @@ function triggerNextVisual(overlays) {
     } else if (nextIndex === 3) {
         // VISUAL 4: Vertical Monolith
         activeOverlay.style.display = 'flex';
-        const mTrack = document.getElementById('mono-track');
-        const mArtist = document.getElementById('mono-artist');
-        const mAlbum = document.getElementById('mono-album');
         
-        mTrack.textContent = track;
-        mArtist.textContent = artist;
-        mAlbum.textContent = album;
+        // Select all elements by class to fill all 9 slots
+        const tracks = activeOverlay.querySelectorAll('.mono-track');
+        const artists = activeOverlay.querySelectorAll('.mono-artist');
+        const albums = activeOverlay.querySelectorAll('.mono-album');
+        
+        tracks.forEach(el => el.textContent = track);
+        artists.forEach(el => el.textContent = artist);
+        albums.forEach(el => el.textContent = album);
 
         const container = activeOverlay.querySelector('.monolith-container');
         container.classList.remove('monolith-active');
-        void container.offsetWidth; // Trigger reflow to restart animation
+        void container.offsetWidth; // Trigger reflow
         container.classList.add('monolith-active');
     }
 
