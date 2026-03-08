@@ -21,7 +21,7 @@ async function redirectToSpotify() {
         code_challenge_method: 'S256', code_challenge: challenge, redirect_uri: redirectUri
     });
     // Use backticks for the template literal
-    window.location.href = `https://accounts.spotify.com/authorize?$${params.toString()}`;
+    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
