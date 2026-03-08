@@ -254,7 +254,7 @@ function startImmersiveSequence() {
 
     // 5. Schedule the next random visual (every 25 seconds)
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
-    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 25000);
+    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
 }
 
 function generateWordCloud() {
