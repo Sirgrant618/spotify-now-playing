@@ -245,7 +245,7 @@ function triggerNextVisual(overlays) {
 
     // Schedule the next FADE OUT in 25 seconds
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
-    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 25000);
+    immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
 }
 
 function generateWordCloud() {
