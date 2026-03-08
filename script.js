@@ -166,7 +166,7 @@ function exitImmersiveMode() {
     document.body.classList.remove('immersive');
     clearTimeout(immersiveSequenceTimeout);
     
-    ['1', '2', '3'].forEach(num => {
+    ['1', '2', '3', '4'].forEach(num => {
         const ov = document.getElementById(`immersive-overlay-${num}`);
         if (ov) {
             ov.style.display = 'none';
@@ -180,7 +180,8 @@ function startImmersiveSequence() {
     const overlays = [
         document.getElementById('immersive-overlay-1'),
         document.getElementById('immersive-overlay-2'),
-        document.getElementById('immersive-overlay-3')
+        document.getElementById('immersive-overlay-3'),
+        document.getElementById('immersive-overlay-4')
     ];
 
     // If a visual is already showing, fade it out first
@@ -212,15 +213,26 @@ function triggerNextVisual(overlays) {
 
     const activeOverlay = overlays[nextIndex];
 
+    // Reset all overlays to hidden before showing the active one
+    overlays.forEach(ov => {
+        ov.style.display = 'none';
+        ov.classList.remove('fade-in');
+    });
+
     if (nextIndex === 0) {
+        // Visual 1: Marquee
         activeOverlay.style.display = 'block';
         document.getElementById('imm-track-1').textContent = (track + ' ').repeat(50);
         document.getElementById('imm-artist-1').textContent = (artist + ' ').repeat(50);
         document.getElementById('imm-album-1').textContent = (album + ' ').repeat(50);
+
     } else if (nextIndex === 1) {
+        // Visual 2: Word Cloud
         activeOverlay.style.display = 'block';
         generateWordCloud();
+
     } else if (nextIndex === 2) {
+        // Visual 3: Drift
         activeOverlay.style.display = 'flex';
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
@@ -232,18 +244,35 @@ function triggerNextVisual(overlays) {
 
         [dTrack, dArtist, dAlbum].forEach(el => {
             el.className = 'drift-text'; 
-            void el.offsetWidth; 
+            void el.offsetWidth; // Force reflow
         });
 
         dTrack.classList.add('drift-rtl');
         dArtist.classList.add('drift-ltr');
         dAlbum.classList.add('drift-rtl');
+
+    } else if (nextIndex === 3) {
+        // Visual 4: Vertical Stack Rotate
+        activeOverlay.style.display = 'flex';
+        const lines = activeOverlay.querySelectorAll('.stack-line');
+        const content = [track, artist, album];
+        
+        lines.forEach((line, i) => {
+            // Cycle through Title -> Artist -> Album every 3 lines
+            const textContent = content[i % 3]; 
+            line.setAttribute('data-text', textContent);
+            
+            // Re-trigger the fade-in animation for each line
+            line.style.animation = 'none';
+            void line.offsetWidth; 
+            line.style.animation = null; 
+        });
     }
 
-    // Trigger the fade-in
+    // Trigger the container fade-in
     setTimeout(() => activeOverlay.classList.add('fade-in'), 50);
 
-    // Schedule the next FADE OUT in 25 seconds
+    // Schedule the next transition
     if (immersiveSequenceTimeout) clearTimeout(immersiveSequenceTimeout);
     immersiveSequenceTimeout = setTimeout(startImmersiveSequence, 35000);
 }
