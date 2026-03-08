@@ -1,9 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;700;900&display=swap');
 
 :root {
-    --spot-1: #ff0046; 
-    --spot-2: #00adef;
-    --spot-3: #ff8500;
+    /* More vibrant, saturated "Neon" Zune-inspired palette */
+    --spot-1: #ff0033; /* Vivid Pink/Red */
+    --spot-2: #00d4ff; /* Electric Cyan */
+    --spot-3: #ffcc00; /* Bright Gold */
     --text-color: #ffffff;
     --border-color: rgba(255, 255, 255, 0.95);
     --panel-bg: rgba(255, 255, 255, 0.06);
@@ -118,29 +119,64 @@ body.immersive .bg-layer.active {
     }
 }
 
-/* --- SPOTLIGHTS --- */
+//* --- SPOTLIGHTS --- */
 .spotlight-container {
-    position: absolute; inset: 0; z-index: 1; opacity: 0.6;
-    pointer-events: none; transition: opacity 3s ease-in-out;
-    mix-blend-mode: screen; 
+    position: absolute; 
+    inset: 0; 
+    z-index: 1; 
+    opacity: 0.8; /* Increased opacity for more punch */
+    pointer-events: none; 
+    transition: opacity 3s ease-in-out;
+    /* 'color-dodge' or 'screen' make colors much more vibrant against dark backgrounds */
+    mix-blend-mode: color-dodge; 
 }
 
-.spotlight { position: absolute; width: 80vw; height: 80vw; border-radius: 50%; filter: blur(100px); opacity: 0.5; }
-.s1 { background: radial-gradient(circle, var(--spot-1) 0%, transparent 70%); top: -10%; left: -10%; animation: sweep1 22s infinite alternate ease-in-out; }
-.s2 { background: radial-gradient(circle, var(--spot-2) 0%, transparent 70%); bottom: -10%; right: -10%; animation: sweep2 28s infinite alternate ease-in-out; }
-.s3 { background: radial-gradient(circle, var(--spot-3) 0%, transparent 70%); top: 20%; left: 20%; animation: sweep3 20s infinite alternate ease-in-out; }
+.spotlight { 
+    position: absolute; 
+    width: 90vw; 
+    height: 90vw; 
+    border-radius: 50%; 
+    filter: blur(120px); 
+    opacity: 0.7; 
+    will-change: transform;
+}
 
-@keyframes sweep1 { 0% { transform: translate(0, 0); } 100% { transform: translate(30vw, 20vh); } }
-@keyframes sweep2 { 0% { transform: translate(0, 0); } 100% { transform: translate(-30vw, -20vh); } }
-@keyframes sweep3 { 0% { transform: translate(0, 0); } 100% { transform: translate(-10vw, 10vh); } }
+.s1 { 
+    background: radial-gradient(circle, var(--spot-1) 0%, transparent 70%); 
+    top: -20%; 
+    left: -20%; 
+    animation: sweep1 12s infinite alternate ease-in-out; 
+}
 
-/* --- UI COMPONENTS --- */
-#player-screen { width: 100%; height: 100%; position: relative; z-index: 2; }
-.zune-layout { display: flex; align-items: center; gap: 40px; width: 100%; height: 100vh; padding: 8vh 8vw; }
-#track-img { width: min(34vw, 450px); height: min(34vw, 450px); border: 2px solid var(--border-color); box-shadow: 0 30px 90px rgba(0,0,0,0.6); transition: all 1s ease; }
-.text-meta { color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: all 0.8s ease; }
-#track-title { margin: 0; font-size: clamp(2.5rem, 6vw, 5.5rem); font-weight: 900; line-height: 0.95; text-transform: uppercase; letter-spacing: -2px; }
-#track-artist { margin: 8px 0 0 0; font-size: clamp(1.2rem, 3vw, 3rem); font-weight: 300; text-transform: uppercase; opacity: 0.9; }
+.s2 { 
+    background: radial-gradient(circle, var(--spot-2) 0%, transparent 70%); 
+    bottom: -20%; 
+    right: -20%; 
+    animation: sweep2 15s infinite alternate ease-in-out; 
+}
+
+.s3 { 
+    background: radial-gradient(circle, var(--spot-3) 0%, transparent 70%); 
+    top: 10%; 
+    left: 10%; 
+    animation: sweep3 10s infinite alternate ease-in-out; 
+}
+
+/* Using translate3d for hardware acceleration and smoother motion */
+@keyframes sweep1 { 
+    0% { transform: translate3d(0, 0, 0); } 
+    100% { transform: translate3d(40vw, 30vh, 0); } 
+}
+
+@keyframes sweep2 { 
+    0% { transform: translate3d(0, 0, 0); } 
+    100% { transform: translate3d(-40vw, -30vh, 0); } 
+}
+
+@keyframes sweep3 { 
+    0% { transform: translate3d(0, 0, 0); } 
+    100% { transform: translate3d(20vw, 15vh, 0); } 
+}
 
 /* IMMERSIVE TRANSITIONS */
 body.immersive #track-img { opacity: 0; transform: scale(0.9) translateY(20px); filter: blur(20px); }
