@@ -235,6 +235,14 @@ function triggerNextVisual(overlays) {
     } else if (nextIndex === 2) {
         // Visual 3: Drift
         activeOverlay.style.display = 'flex';
+
+        // --- NEW RANDOM ROTATION LOGIC ---
+        const angles = [-30, -15, 15, 30];
+        const randomAngle = angles[Math.floor(Math.random() * angles.length)];
+        const container = activeOverlay.querySelector('.stacked-drift-container');
+        container.style.setProperty('--drift-rotation', `${randomAngle}deg`);
+        // ---------------------------------
+        
         const dTrack = document.getElementById('drift-track');
         const dArtist = document.getElementById('drift-artist');
         const dAlbum = document.getElementById('drift-album');

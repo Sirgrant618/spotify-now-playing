@@ -240,7 +240,9 @@ body.immersive .text-meta { opacity: 0; transform: translateY(20px); }
     display: flex;
     flex-direction: column;
     gap: 2vh;
-    transform: rotate(-30deg); 
+    /* Use a variable with a fallback to -30deg */
+    transform: rotate(var(--drift-rotation, -30deg)); 
+    transition: transform 1s ease-out; /* Optional: smooths the transition between rotations */
 }
 
 /* --- THE PARENT: Constant Slow Transversal Drift --- */
